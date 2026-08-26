@@ -21,7 +21,10 @@ if (!process.env.JWT_SECRET) {
 
 // Initialize the Express app
 const app = express();
-fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
+const uploadsDirectory = process.env.VERCEL ? null : path.join(__dirname, 'uploads');
+if (uploadsDirectory) {
+  fs.mkdirSync(uploadsDirectory, { recursive: true });
+}
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
@@ -69,7 +72,9 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'views')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+if (uploadsDirectory) {
+  app.use('/uploads', express.static(uploadsDirectory));
+}
 
 // Request logging
 app.use((req, res, next) => {
