@@ -1,0 +1,98 @@
+<html>
+<head>
+    <title>Contact Us - Tasky</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-purple-50">
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold text-purple-600 hover:opacity-80 transition-opacity cursor-pointer">Tasky</a>
+            <nav class="space-x-4">
+                <a href="index.html" class="text-gray-600 hover:text-purple-500">Home</a>
+                <a href="browsetask.html" class="text-gray-600 hover:text-purple-500">Browse Tasks</a>
+                <a href="#" id="postTaskButton" class="text-gray-600 hover:text-purple-500">Post Task</a>
+                <a href="login.html" class="text-purple-500 font-semibold">Login</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        <h1 class="text-4xl font-bold text-center mb-12">Contact Us</h1>
+        <div class="flex flex-col md:flex-row justify-center items-start space-y-8 md:space-y-0 md:space-x-8">
+            <div class="bg-purple-500 text-white p-8 rounded-lg shadow-lg w-full md:w-1/2">
+                <h2 class="text-2xl font-bold mb-4">Get In Touch</h2>
+                <p class="mb-4">Have questions or feedback? We'd love to hear from you. Reach out to us using any of the methods below.</p>
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-envelope mr-4"></i>
+                        <div>
+                            <p class="font-semibold">Email</p>
+                            <p>ps9935542@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-phone mr-4"></i>
+                        <div>
+                            <p class="font-semibold">Phone</p>
+                            <p>+91 7355364091</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-map-marker-alt mr-4"></i>
+                        <div>
+                            <p class="font-semibold">Location</p>
+                            <p>College Campus, India</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-8">Business Hours: Mon-Fri, 9am-5pm IST</p>
+            </div>
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full md:w-1/2">
+                <h2 class="text-2xl font-bold mb-4">Send us a Message</h2>
+                <form>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input type="text" placeholder="Your Name" class="border border-gray-300 p-2 rounded">
+                        <input type="email" placeholder="Email Address" class="border border-gray-300 p-2 rounded">
+                    </div>
+                    <input type="text" placeholder="Subject" class="border border-gray-300 p-2 rounded w-full mb-4">
+                    <textarea placeholder="Message" class="border border-gray-300 p-2 rounded w-full mb-4"></textarea>
+                    <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-600">Send Message <i class="fas fa-paper-plane ml-2"></i></button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-purple-500 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-8 md:space-y-0">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Tasky</h3>
+                    <p>Connect with experts who can help with your tasks. Find assignments, freelance work, and more.</p>
+                    <p class="mt-4">&copy; 2025 Tasky. All rights reserved.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="hover:underline">Home</a></li>
+                        <li><a href="browsetask.html" class="hover:underline">Browse Tasks</a></li>
+                        <li><a href="login.html" class="hover:underline">Post a Task</a></li>
+                        <li><a href="login.html" class="hover:underline">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Connect With Us</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <p class="mt-4"><i class="fas fa-envelope mr-2"></i>contact@tasky.com</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="shared/navigation.js"></script>
+</body>
+</html>

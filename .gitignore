@@ -46,6 +46,9 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+# dotenv environment variables file
+.env
+
 # IDE files
 .vscode/
 .idea/
@@ -60,3 +63,4 @@ jspm_packages/
 .Trashes
 ehthumbs.db
 Thumbs.db
+

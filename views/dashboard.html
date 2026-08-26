@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tasky</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        /* Ensure dropdown menu is properly styled and visible */
+        #dropdownMenu {
+            z-index: 1000;
+        }
+        
+        #dropdownMenu a {
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Ensure profile dropdown button is clickable */
+        #profileDropdown {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        #profileDropdown:hover {
+            transform: scale(1.05);
+        }
+        
+        #profileDropdown:focus {
+            outline: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-purple-600 hover:opacity-80 transition-opacity cursor-pointer">Tasky</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-purple-600 font-medium">Dashboard</a>
+                    <a href="browsetask.html" class="text-gray-700 hover:text-purple-600">Browse Tasks</a>
+                    <a href="mytasks.html" class="text-gray-700 hover:text-purple-600">My Tasks</a>
+                    <a href="profile.html" class="text-gray-700 hover:text-purple-600">Profile</a>
+                    
+                    <!-- Login/Signup buttons (shown when not logged in) -->
+                    <div id="loginSection" style="display: none;">
+                        <a href="login.html" class="text-gray-700 hover:text-purple-600 mr-4">Login</a>
+                        <a href="signup.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Sign Up</a>
+                    </div>
+                    
+                    <!-- Profile dropdown (shown when logged in) -->
+                    <div id="profileSection" class="relative" style="display: none;">
+                        <button id="profileDropdown" class="flex text-sm rounded-full focus:outline-none ring-2 ring-purple-500 ring-offset-2">
+                            <img id="profileImage" class="h-9 w-9 rounded-full" src="https://via.placeholder.com/40" alt="Profile">
+                        </button>
+                        <div id="dropdownMenu" class="hidden origin-top-right absolute right-0 mt-3 w-56 rounded-xl shadow-lg py-2 bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100">
+                            <div class="px-4 py-3">
+                                <p id="profileName" class="text-sm font-medium text-gray-900">User</p>
+                                <p id="profileMajor" class="text-sm text-gray-500 truncate">Student</p>
+                            </div>
+                            <div class="py-1">
+                                <a href="dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                                </a>
+                                <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i>Profile
+                                </a>
+                                <a href="mytasks.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-tasks mr-2"></i>My Tasks
+                                </a>
+                                <a href="browsetask.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-search mr-2"></i>Browse Tasks
+                                </a>
+                            </div>
+                            <div class="py-1">
+                                <a href="#" id="logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <section class="container mx-auto px-4 py-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Dashboard</h1>
+        
+        <!-- Loading State -->
+        <div id="dashboardLoading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading dashboard...</p>
+        </div>
+        
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Wallet Balance -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-wallet text-green-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Wallet Balance</p>
+                        <p class="text-2xl font-bold text-gray-900" id="walletBalance">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Tasks -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-tasks text-blue-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Active Tasks</p>
+                        <p class="text-2xl font-bold text-gray-900" id="activeTasks">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Earnings -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Earnings</p>
+                        <p class="text-2xl font-bold text-gray-900" id="totalEarnings">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-star text-yellow-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Rating</p>
+                        <p class="text-2xl font-bold text-gray-900" id="userRating">0.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Recent Tasks -->
+                <div class="bg-white rounded-lg shadow-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-bold text-gray-900">Recent Tasks</h2>
+                            <a href="mytasks.html" class="text-purple-600 hover:text-purple-700 text-sm font-medium">View All</a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="recentTasks" class="space-y-4">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Bids -->
+                <div class="bg-white rounded-lg shadow-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-bold text-gray-900">Recent Bids</h2>
+                            <a href="mybids.html" class="text-purple-600 hover:text-purple-700 text-sm font-medium">View All</a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="recentBids" class="space-y-4">
+                            <!-- Bids will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <a href="posttask.html" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Post New Task
+                        </a>
+                        <a href="browsetask.html" class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <i class="fas fa-search mr-2"></i>
+                            Browse Tasks
+                        </a>
+                        <a href="messages.html" class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Messages
+                        </a>
+                        <a href="profile.html" class="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                            <i class="fas fa-user mr-2"></i>
+                            Edit Profile
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Messages -->
+                <div class="bg-white rounded-lg shadow-lg">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-bold text-gray-900">Recent Messages</h2>
+                            <a href="messages.html" class="text-purple-600 hover:text-purple-700 text-sm font-medium">View All</a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="recentMessages" class="space-y-4">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-purple-600 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Tasky. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Navigation Script -->
+    <script src="shared/navigation.js"></script>
+    
+    <!-- Dashboard Script -->
+    <script>
+        // Check authentication
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        let currentUser = null;
+
+        // Initialize dashboard
+        async function initDashboard() {
+            try {
+                console.log('Initializing dashboard...');
+                await loadUserProfile();
+                console.log('User profile loaded');
+                await loadDashboardData();
+                console.log('Dashboard data loaded');
+                setupEventListeners();
+                console.log('Dashboard initialized successfully');
+                
+                // Hide loading state
+                const loadingElement = document.getElementById('dashboardLoading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                showNotification('Error loading dashboard data', 'error');
+                
+                // Hide loading state even on error
+                const loadingElement = document.getElementById('dashboardLoading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+            }
+        }
+
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                console.log('Loading user profile...');
+                const response = await fetch('/api/auth/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    console.log('User profile loaded:', currentUser);
+                    updateUserInfo();
+                } else {
+                    console.error('Failed to load user profile, status:', response.status);
+                    throw new Error('Failed to load user profile');
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                // Fallback to basic user info
+                updateUserInfo();
+            }
+        }
+
+        // Update user info in UI
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('walletBalance').textContent = `₹${currentUser.walletBalance || 0}`;
+                document.getElementById('totalEarnings').textContent = `₹${currentUser.totalEarnings || 0}`;
+                document.getElementById('userRating').textContent = currentUser.rating || '0.0';
+                
+                // Update profile dropdown if elements exist
+                const profileName = document.getElementById('profileName');
+                const profileImage = document.getElementById('profileImage');
+                
+                if (profileName) {
+                    profileName.textContent = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim() || currentUser.username || 'User';
+                }
+                
+                if (profileImage && currentUser.profilePicture) {
+                    profileImage.src = currentUser.profilePicture;
+                }
+            } else {
+                // Set default values if no user data
+                document.getElementById('walletBalance').textContent = '₹0';
+                document.getElementById('totalEarnings').textContent = '₹0';
+                document.getElementById('userRating').textContent = '0.0';
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                await Promise.allSettled([
+                    loadRecentTasks(),
+                    loadRecentBids(),
+                    loadRecentMessages()
+                ]);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showNotification('Some dashboard data could not be loaded', 'error');
+            }
+        }
+
+        // Load recent tasks
+        async function loadRecentTasks() {
+            try {
+                const response = await fetch('/api/tasks/posted?limit=5', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayRecentTasks(data.tasks || []);
+                    document.getElementById('activeTasks').textContent = (data.tasks || []).filter(t => t.status === 'in-progress').length;
+                } else {
+                    throw new Error('Failed to load tasks');
+                }
+            } catch (error) {
+                console.error('Error loading recent tasks:', error);
+                document.getElementById('recentTasks').innerHTML = '<p class="text-gray-500 text-center py-4">Error loading tasks</p>';
+            }
+        }
+
+        // Display recent tasks
+        function displayRecentTasks(tasks) {
+            const container = document.getElementById('recentTasks');
+            
+            if (!tasks || tasks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No tasks found</p>';
+                return;
+            }
+
+            container.innerHTML = tasks.map(task => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">${task.title || 'Untitled Task'}</h3>
+                            <p class="text-sm text-gray-600 mb-2">${(task.description || '').substring(0, 100)}...</p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <span class="flex items-center">
+                                    <i class="fas fa-rupee-sign mr-1"></i>
+                                    ₹${task.budget || 0}
+                                </span>
+                                <span class="flex items-center">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                    ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'}
+                                </span>
+                                <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(task.status)}">
+                                    ${task.status || 'unknown'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent bids
+        async function loadRecentBids() {
+            try {
+                const response = await fetch('/api/bids/my-bids', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Limit to 5 bids for display
+                    const limitedBids = data.bids ? data.bids.slice(0, 5) : [];
+                    displayRecentBids(limitedBids);
+                } else {
+                    throw new Error('Failed to load bids');
+                }
+            } catch (error) {
+                console.error('Error loading recent bids:', error);
+                document.getElementById('recentBids').innerHTML = '<p class="text-gray-500 text-center py-4">Error loading bids</p>';
+            }
+        }
+
+        // Display recent bids
+        function displayRecentBids(bids) {
+            const container = document.getElementById('recentBids');
+            
+            if (!bids || bids.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No bids found</p>';
+                return;
+            }
+
+            container.innerHTML = bids.map(bid => `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-900 mb-1">${bid.taskId?.title || 'Task'}</h3>
+                            <p class="text-sm text-gray-600 mb-2">${(bid.message || '').substring(0, 100)}...</p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                <span class="flex items-center">
+                                    <i class="fas fa-rupee-sign mr-1"></i>
+                                    ₹${bid.amount || 0}
+                                </span>
+                                <span class="px-2 py-1 rounded-full text-xs ${getBidStatusColor(bid.status)}">
+                                    ${bid.status || 'unknown'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load recent messages
+        async function loadRecentMessages() {
+            try {
+                const response = await fetch('/api/messages/conversations', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Limit to 5 conversations for display
+                    const limitedConversations = data.conversations ? data.conversations.slice(0, 5) : [];
+                    displayRecentMessages(limitedConversations);
+                }
+            } catch (error) {
+                console.error('Error loading recent messages:', error);
+                document.getElementById('recentMessages').innerHTML = '<p class="text-gray-500 text-center py-4">Error loading messages</p>';
+            }
+        }
+
+        // Display recent messages
+        function displayRecentMessages(conversations) {
+            const container = document.getElementById('recentMessages');
+            
+            if (!conversations || conversations.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">No messages found</p>';
+                return;
+            }
+
+            container.innerHTML = conversations.map(conversation => `
+                <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-purple-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                            ${conversation.title || 'Conversation'}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            ${conversation.lastMessageAt ? new Date(conversation.lastMessageAt).toLocaleDateString() : 'No messages'}
+                        </p>
+                    </div>
+                    ${(conversation.unreadCount || 0) > 0 ? `
+                        <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                            ${conversation.unreadCount}
+                        </span>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Utility functions
+        function getStatusColor(status) {
+            const colors = {
+                'open': 'bg-green-100 text-green-800',
+                'in-progress': 'bg-blue-100 text-blue-800',
+                'completed': 'bg-gray-100 text-gray-800',
+                'cancelled': 'bg-red-100 text-red-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getBidStatusColor(status) {
+            const colors = {
+                'pending': 'bg-yellow-100 text-yellow-800',
+                'accepted': 'bg-green-100 text-green-800',
+                'rejected': 'bg-red-100 text-red-800',
+                'withdrawn': 'bg-gray-100 text-gray-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'error' ? 'bg-red-500 text-white' : 
+                type === 'success' ? 'bg-green-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // The navigation.js file handles the dropdown functionality
+            // We just need to ensure the profile section is visible
+            // The navigation.js will handle showing/hiding based on auth status
+            
+            console.log('Dashboard event listeners setup complete');
+            
+            // Debug: Check if dropdown elements exist
+            const profileDropdown = document.getElementById('profileDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const profileSection = document.getElementById('profileSection');
+            
+            console.log('Dashboard dropdown elements check:', {
+                profileDropdown: !!profileDropdown,
+                dropdownMenu: !!dropdownMenu,
+                profileSection: !!profileSection,
+                profileSectionDisplay: profileSection ? profileSection.style.display : 'not found'
+            });
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for Google OAuth success
+            const urlParams = new URLSearchParams(window.location.search);
+            const loginSuccess = urlParams.get('login');
+            if (loginSuccess === 'success') {
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                successMessage.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Successfully logged in with Google!</span>
+                    </div>
+                `;
+                document.body.appendChild(successMessage);
+                
+                // Remove message after 3 seconds
+                setTimeout(() => {
+                    successMessage.remove();
+                }, 3000);
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            // Let navigation.js initialize first, then initialize dashboard
+            setTimeout(() => {
+                initDashboard();
+            }, 200);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tasky | My Tasks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              purple: {
+                50: "#faf5ff",
+                100: "#f3e8ff",
+                200: "#e9d5ff",
+                300: "#d8b4fe",
+                400: "#c084fc",
+                500: "#a855f7",
+                600: "#9333ea",
+                700: "#7e22ce",
+                800: "#6b21a8",
+                900: "#581c87",
+              },
+            },
+            fontFamily: {
+              sans: ['"DM Sans"', "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .glass-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .purple-glow {
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+      }
+      .hover-scale {
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .hover-scale:hover {
+        transform: translateY(-5px) scale(1.02);
+      }
+      .nav-link {
+        position: relative;
+      }
+      .nav-link:after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -4px;
+        left: 0;
+        background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%);
+        transition: width 0.4s ease;
+      }
+      .nav-link:hover:after {
+        width: 100%;
+      }
+      .gradient-text {
+        background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .task-status-open {
+        background-color: #f0fdf4;
+        color: #16a34a;
+      }
+      .task-status-in-progress {
+        background-color: #eff6ff;
+        color: #2563eb;
+      }
+      .task-status-completed {
+        background-color: #f5f3ff;
+        color: #7c3aed;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-purple-600 hover:opacity-80 transition-opacity cursor-pointer">Tasky</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-gray-700 hover:text-purple-600">Dashboard</a>
+                    <a href="browsetask.html" class="text-gray-700 hover:text-purple-600">Browse Tasks</a>
+                    <a href="mytasks.html" class="text-purple-600 font-medium">My Tasks</a>
+                    <a href="profile.html" class="text-gray-700 hover:text-purple-600">Profile</a>
+                    
+                    <!-- Login/Signup buttons (shown when not logged in) -->
+                    <div id="loginSection" style="display: none;">
+                        <a href="login.html" class="text-gray-700 hover:text-purple-600 mr-4">Login</a>
+                        <a href="signup.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Sign Up</a>
+                    </div>
+                    
+                    <!-- Profile dropdown (shown when logged in) -->
+                    <div id="profileSection" class="relative" style="display: none;">
+                        <button id="profileDropdown" class="flex items-center space-x-2 focus:outline-none">
+                            <img id="profileImage" src="https://via.placeholder.com/40" alt="Profile" class="w-8 h-8 rounded-full">
+                            <span id="profileName" class="text-gray-700">User</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <a href="dashboard.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                            </a>
+                            <a href="profile.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-user mr-2"></i>Profile
+                            </a>
+                            <a href="mytasks.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-tasks mr-2"></i>My Tasks
+                            </a>
+                            <a href="messages.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-envelope mr-2"></i>Messages
+                            </a>
+                            <hr class="my-2">
+                            <a href="#" id="logout" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area (styled like index.html) -->
+    <div
+      class="relative pt-32 pb-24 px-6 sm:pt-40 sm:pb-32 lg:pt-48 lg:pb-40 lg:px-8"
+    >
+      <div class="absolute inset-0">
+        <div
+          class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80')] bg-cover bg-center opacity-20"
+        ></div>
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-purple-900/30"
+        ></div>
+      </div>
+      <div class="relative max-w-7xl mx-auto">
+        <div class="text-center">
+          <h1
+            class="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl"
+          >
+            <span class="block">My Task</span>
+            <span class="block gradient-text">Dashboard</span>
+          </h1>
+          <p class="mt-6 max-w-2xl mx-auto text-xl text-gray-700">
+            Manage all your posted tasks and bids in one place
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Management Section -->
+    <div class="relative py-16 bg-white">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-12">
+          <nav class="-mb-px flex space-x-8">
+            <button
+              id="postedTab"
+              class="border-b-2 border-purple-500 text-purple-600 px-1 py-4 text-base font-medium"
+            >
+              Posted Tasks
+            </button>
+            <button
+              id="bidsTab"
+              class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 py-4 text-base font-medium"
+            >
+              My Bids
+            </button>
+          </nav>
+        </div>
+
+        <!-- Posted Tasks Section -->
+        <div id="postedTasksContent" class="py-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-900">
+              Tasks You've Posted
+            </h2>
+            <a
+              href="posttask.html"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 focus:outline-none purple-glow hover-scale"
+            >
+              <i class="fas fa-plus mr-2"></i> Post New Task
+            </a>
+          </div>
+
+          <div
+            id="tasksList"
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <!-- Tasks will be loaded here dynamically -->
+            <div class="text-center py-12 col-span-full">
+              <div
+                class="inline-block p-6 rounded-full bg-purple-50 text-purple-600 mb-4"
+              >
+                <i class="fas fa-tasks text-3xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900">
+                Loading your tasks...
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Bids Section -->
+        <div id="myBidsContent" class="py-8 hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-semibold text-gray-900">
+              Tasks You've Bid On
+            </h2>
+            <a
+              href="browsetask.html"
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 focus:outline-none purple-glow hover-scale"
+            >
+              <i class="fas fa-search mr-2"></i> Browse Tasks
+            </a>
+          </div>
+
+          <div
+            id="bidsList"
+            class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <!-- Bids will be loaded here dynamically -->
+            <div class="text-center py-12 col-span-full">
+              <div
+                class="inline-block p-6 rounded-full bg-purple-50 text-purple-600 mb-4"
+              >
+                <i class="fas fa-hand-holding-usd text-3xl"></i>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900">
+                Loading your bids...
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section (matches index.html) -->
+    <div class="relative bg-white py-16">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+          <div
+            class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white"
+          >
+            <p class="text-4xl font-bold text-purple-600" id="postedTasksCount">
+              0
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-500">TASKS POSTED</p>
+          </div>
+          <div
+            class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white"
+          >
+            <p class="text-4xl font-bold text-purple-600" id="activeBidsCount">
+              0
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-500">ACTIVE BIDS</p>
+          </div>
+          <div
+            class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white"
+          >
+            <p
+              class="text-4xl font-bold text-purple-600"
+              id="completedTasksCount"
+            >
+              0
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-500">COMPLETED</p>
+          </div>
+          <div
+            class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white"
+          >
+            <p
+              class="text-4xl font-bold text-purple-600"
+              id="totalEarningsCount"
+            >
+              0
+            </p>
+            <p class="mt-2 text-sm font-medium text-gray-500">TOTAL EARNED</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer (matches index.html) -->
+    <footer class="bg-gray-900 text-white">
+      <div class="max-w-7xl mx-auto py-16 px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+          <div class="col-span-2">
+            <div class="flex items-center">
+              <div
+                class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shadow-md"
+              >
+                <i class="fas fa-tasks text-white text-lg"></i>
+              </div>
+              <span
+                class="ml-3 text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent"
+                >Tasky</span
+              >
+            </div>
+            <p class="mt-4 text-gray-400">
+              The premium platform for student academic collaboration and
+              support.
+            </p>
+            <div class="mt-6 flex space-x-6">
+              <a href="#" class="text-gray-400 hover:text-white">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white">
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#" class="text-gray-400 hover:text-white">
+                <i class="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h3
+              class="text-sm font-semibold tracking-wider text-purple-400 uppercase"
+            >
+              Solutions
+            </h3>
+            <ul class="mt-4 space-y-3">
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white"
+                  >Assignment Help</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white"
+                  >Research Papers</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white"
+                  >Lab Reports</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white"
+                  >Presentation Design</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3
+              class="text-sm font-semibold tracking-wider text-purple-400 uppercase"
+            >
+              Company
+            </h3>
+            <ul class="mt-4 space-y-3">
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white">About Us</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white">Careers</a>
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white"
+                  >Academic Integrity</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-300 hover:text-white">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="mt-16 pt-10 border-t border-gray-800 flex flex-col md:flex-row justify-between"
+        >
+          <p class="text-gray-400 text-sm">
+            &copy; 2025 Tasky. All rights reserved.
+          </p>
+          <div class="mt-4 md:mt-0 flex space-x-8">
+            <a href="#" class="text-gray-400 hover:text-white text-sm"
+              >Privacy Policy</a
+            >
+            <a href="#" class="text-gray-400 hover:text-white text-sm"
+              >Terms of Service</a
+            >
+            <a href="#" class="text-gray-400 hover:text-white text-sm"
+              >Cookie Policy</a
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Task Card Template -->
+    <template id="taskCardTemplate">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover-scale">
+        <div
+          class="h-48 bg-gradient-to-r from-purple-500 to-purple-300 flex items-center justify-center"
+        >
+          <i class="fas fa-tasks text-white text-5xl"></i>
+        </div>
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <h3 class="text-xl font-bold text-gray-900 task-title">
+              Task Title
+            </h3>
+            <span
+              class="task-status px-3 py-1 rounded-full text-xs font-semibold"
+              >Open</span
+            >
+          </div>
+          <p class="mt-2 text-gray-600 task-description">
+            Task description goes here...
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+            >
+              <i class="fas fa-tag mr-1"></i>
+              <span class="task-category">Category</span>
+            </span>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+            >
+              <i class="far fa-clock mr-1"></i>
+              <span class="task-deadline">Deadline</span>
+            </span>
+          </div>
+          <div class="mt-6 flex justify-between items-center">
+            <div>
+              <p class="text-sm text-gray-500">Budget</p>
+              <p class="text-lg font-semibold text-purple-600">
+                ₹<span class="task-budget">0</span>
+              </p>
+            </div>
+            <div class="flex space-x-2">
+              <button
+                class="view-task-btn inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+              >
+                View
+              </button>
+              <button
+                class="view-bids-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none"
+              >
+                View Bids
+              </button>
+              <button
+                class="delete-task-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Bid Card Template -->
+    <template id="bidCardTemplate">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover-scale">
+        <div
+          class="h-48 bg-gradient-to-r from-purple-500 to-purple-300 flex items-center justify-center"
+        >
+          <i class="fas fa-hand-holding-usd text-white text-5xl"></i>
+        </div>
+        <div class="p-6">
+          <div class="flex justify-between items-start">
+            <h3 class="text-xl font-bold text-gray-900 bid-task-title">
+              Task Title
+            </h3>
+            <span
+              class="bid-status px-3 py-1 rounded-full text-xs font-semibold"
+              >Pending</span
+            >
+          </div>
+          <div class="mt-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">Your Bid</p>
+                <p class="text-lg font-semibold text-purple-600">
+                  ₹<span class="bid-amount">0</span>
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Task Budget</p>
+                <p class="text-lg font-semibold text-gray-900">
+                  ₹<span class="task-budget">0</span>
+                </p>
+              </div>
+            </div>
+            <div class="mt-3">
+              <p class="text-sm text-gray-500">Your Message</p>
+              <p class="text-sm text-gray-700 bid-message">
+                I can complete this task...
+              </p>
+            </div>
+          </div>
+          <div class="mt-6 flex justify-between items-center">
+            <div class="flex space-x-2">
+              <button
+                class="view-task-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none"
+              >
+                View Task
+              </button>
+              <button
+                class="withdraw-bid-btn inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+              >
+                Withdraw
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script src="shared/navigation.js"></script>
+    <script>
+      // Tab Switching
+      const postedTab = document.getElementById("postedTab");
+      const bidsTab = document.getElementById("bidsTab");
+      const postedTasksContent = document.getElementById("postedTasksContent");
+      const myBidsContent = document.getElementById("myBidsContent");
+
+      postedTab.addEventListener("click", () => {
+        postedTab.classList.add("border-purple-500", "text-purple-600");
+        postedTab.classList.remove(
+          "border-transparent",
+          "text-gray-500",
+          "hover:text-gray-700",
+          "hover:border-gray-300"
+        );
+        bidsTab.classList.add(
+          "border-transparent",
+          "text-gray-500",
+          "hover:text-gray-700",
+          "hover:border-gray-300"
+        );
+        bidsTab.classList.remove("border-purple-500", "text-purple-600");
+        postedTasksContent.classList.remove("hidden");
+        myBidsContent.classList.add("hidden");
+      });
+
+      bidsTab.addEventListener("click", () => {
+        bidsTab.classList.add("border-purple-500", "text-purple-600");
+        bidsTab.classList.remove(
+          "border-transparent",
+          "text-gray-500",
+          "hover:text-gray-700",
+          "hover:border-gray-300"
+        );
+        postedTab.classList.add(
+          "border-transparent",
+          "text-gray-500",
+          "hover:text-gray-700",
+          "hover:border-gray-300"
+        );
+        postedTab.classList.remove("border-purple-500", "text-purple-600");
+        myBidsContent.classList.remove("hidden");
+        postedTasksContent.classList.add("hidden");
+      });
+
+      // Get authentication token
+      const getToken = () => {
+        return localStorage.getItem("token");
+      };
+
+      // Load User's Tasks
+      async function loadTasks() {
+        const tasksList = document.getElementById("tasksList");
+
+        try {
+          const token = getToken();
+          if (!token) {
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const response = await fetch('/api/tasks/posted', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch tasks');
+          }
+
+          const data = await response.json();
+          const tasks = data.tasks || [];
+
+          // Update stats
+          document.getElementById("postedTasksCount").textContent =
+            tasks.length;
+          document.getElementById("completedTasksCount").textContent =
+            tasks.filter((t) => t.status === "completed").length;
+
+          if (tasks.length === 0) {
+            tasksList.innerHTML = `
+                        <div class="text-center py-12 col-span-full">
+                            <div class="inline-block p-6 rounded-full bg-purple-50 text-purple-600 mb-4">
+                                <i class="fas fa-tasks text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">You haven't posted any tasks yet</h3>
+                            <p class="mt-1 text-gray-600">Get started by posting your first task</p>
+                            <div class="mt-6">
+                                <a href="posttask.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 focus:outline-none purple-glow hover-scale">
+                                    Post Your First Task
+                                </a>
+                            </div>
+                        </div>
+                    `;
+            return;
+          }
+
+          tasksList.innerHTML = "";
+          const template = document.getElementById("taskCardTemplate");
+
+          tasks.forEach((task) => {
+            const clone = template.content.cloneNode(true);
+
+            // Fill in task data
+            clone.querySelector(".task-title").textContent = task.title;
+            clone.querySelector(".task-description").textContent =
+              task.description;
+            clone.querySelector(".task-category").textContent = task.category;
+            clone.querySelector(".task-deadline").textContent = formatDate(
+              task.deadline
+            );
+            clone.querySelector(".task-budget").textContent = task.budget;
+
+            // Set status
+            const statusElement = clone.querySelector(".task-status");
+            statusElement.textContent =
+              task.status === "open"
+                ? "Open"
+                : task.status === "in-progress"
+                ? "In Progress"
+                : "Completed";
+            statusElement.className = `task-status px-3 py-1 rounded-full text-xs font-semibold ${
+              task.status === "open"
+                ? "task-status-open"
+                : task.status === "in-progress"
+                ? "task-status-in-progress"
+                : "task-status-completed"
+            }`;
+
+            // Add event listeners
+            clone
+              .querySelector(".view-task-btn")
+              .addEventListener("click", () => viewTask(task._id));
+            clone
+              .querySelector(".view-bids-btn")
+              .addEventListener("click", () => viewBids(task._id));
+            clone
+              .querySelector(".delete-task-btn")
+              .addEventListener("click", () => deleteTask(task._id));
+
+            tasksList.appendChild(clone);
+          });
+        } catch (error) {
+          console.error("Error loading tasks:", error);
+          tasksList.innerHTML = `
+                    <div class="text-center py-12 col-span-full text-red-500">
+                        Failed to load tasks. Please try again later.
+                    </div>
+                `;
+        }
+      }
+
+      // Load User's Bids
+      async function loadBids() {
+        const bidsList = document.getElementById("bidsList");
+
+        try {
+          const token = getToken();
+          if (!token) {
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const response = await fetch('/api/bids/my-bids', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          const bids = data.bids || [];
+
+          // Update stats
+          document.getElementById("activeBidsCount").textContent = bids.filter(
+            (b) => b.status === "pending"
+          ).length;
+          document.getElementById("totalEarningsCount").textContent = bids
+            .filter((b) => b.status === "accepted")
+            .reduce((sum, bid) => sum + bid.amount, 0);
+
+          if (bids.length === 0) {
+            bidsList.innerHTML = `
+                        <div class="text-center py-12 col-span-full">
+                            <div class="inline-block p-6 rounded-full bg-purple-50 text-purple-600 mb-4">
+                                <i class="fas fa-hand-holding-usd text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900">You haven't placed any bids yet</h3>
+                            <p class="mt-1 text-gray-600">Browse available tasks to place your bid</p>
+                            <div class="mt-6">
+                                <a href="browsetask.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 focus:outline-none purple-glow hover-scale">
+                                    Browse Available Tasks
+                                </a>
+                            </div>
+                        </div>
+                    `;
+            return;
+          }
+
+          bidsList.innerHTML = "";
+          const template = document.getElementById("bidCardTemplate");
+
+          console.log('All bids:', bids); // Debug log
+          bids.forEach((bid) => {
+            console.log('Processing bid:', bid._id, 'Status:', bid.status); // Debug log
+            const clone = template.content.cloneNode(true);
+
+            // Fill in bid data
+            clone.querySelector(".bid-task-title").textContent =
+              bid.taskId?.title || "Task";
+            clone.querySelector(".bid-amount").textContent = bid.amount;
+            clone.querySelector(".task-budget").textContent =
+              bid.taskId?.budget || "N/A";
+            clone.querySelector(".bid-message").textContent =
+              bid.message || "No message provided";
+
+            // Set status
+            const statusElement = clone.querySelector(".bid-status");
+            statusElement.textContent =
+              bid.status === "pending"
+                ? "Pending"
+                : bid.status === "accepted"
+                ? "Accepted"
+                : "Rejected";
+            statusElement.className = `bid-status px-3 py-1 rounded-full text-xs font-semibold ${
+              bid.status === "pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : bid.status === "accepted"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`;
+
+            // Add event listeners
+            clone
+              .querySelector(".view-task-btn")
+              .addEventListener("click", () => viewTask(bid.taskId?._id));
+            clone
+              .querySelector(".withdraw-bid-btn")
+              .addEventListener("click", () => withdrawBid(bid._id));
+
+            // Add contact button for accepted bids (temporarily show for all bids for testing)
+            if (bid.status === 'accepted' || true) { // Temporarily show for all bids
+              const actionsDiv = clone.querySelector('.flex.space-x-2');
+              const contactBtn = document.createElement('button');
+              contactBtn.className = 'inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none';
+              contactBtn.innerHTML = '<i class="fas fa-comments mr-1"></i>Contact';
+              contactBtn.addEventListener('click', () => contactClient(bid));
+              actionsDiv.appendChild(contactBtn);
+            }
+
+            bidsList.appendChild(clone);
+          });
+        } catch (error) {
+          console.error("Error loading bids:", error);
+          bidsList.innerHTML = `
+                    <div class="text-center py-12 col-span-full text-red-500">
+                        Failed to load bids. Please try again later.
+                    </div>
+                `;
+        }
+      }
+
+      // Helper Functions
+      function formatDate(dateString) {
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+      }
+
+      // Action Functions
+
+      async function withdrawBid(bidId) {
+        if (confirm("Are you sure you want to withdraw this bid?")) {
+          try {
+            const token = getToken();
+            const response = await fetch(`/api/bids/${bidId}/withdraw`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              alert("Bid withdrawn successfully");
+              loadBids(); // Refresh the list
+            } else {
+              const error = await response.json();
+              throw new Error(error.message || "Failed to withdraw bid");
+            }
+          } catch (error) {
+            console.error("Error withdrawing bid:", error);
+            alert("Failed to withdraw bid. Please try again.");
+          }
+        }
+      }
+
+      function viewTask(taskId) {
+        window.location.href = `task-detail.html?id=${taskId}`;
+      }
+
+      function viewBids(taskId) {
+        window.location.href = `task-bids.html?id=${taskId}`;
+      }
+
+      function contactClient(bid) {
+        // For accepted bids, contact the task owner
+        console.log('Contact client function called!'); // Debug log
+        console.log('Bid data for contact:', bid); // Debug log
+        
+        if (bid.taskId && bid.taskId.clientId) {
+          const chatUrl = `chat.html?taskId=${bid.taskId._id}&bidId=${bid._id}&participantId=${bid.taskId.clientId._id}`;
+          console.log('Opening chat URL:', chatUrl); // Debug log
+          console.log('Task ID:', bid.taskId._id); // Debug log
+          console.log('Bid ID:', bid._id); // Debug log
+          console.log('Client ID:', bid.taskId.clientId._id); // Debug log
+          window.open(chatUrl, '_blank');
+        } else {
+          console.log('Task data:', bid.taskId); // Debug log
+          console.log('Client ID missing:', bid.taskId?.clientId); // Debug log
+          alert('Client information not available');
+        }
+      }
+
+      // Initialize the page
+
+      // Delete task
+      async function deleteTask(taskId) {
+        if (!confirm('Are you sure you want to delete this task?')) {
+          return;
+        }
+
+        try {
+          const token = getToken();
+          const response = await fetch(`/api/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            alert('Task deleted successfully!');
+            loadTasks(); // Reload tasks
+          } else {
+            const error = await response.json();
+            alert('Failed to delete task: ' + error.message);
+          }
+        } catch (error) {
+          console.error('Error deleting task:', error);
+          alert('Error deleting task. Please try again.');
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadTasks();
+        loadBids();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasky - Create an Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-xl font-bold text-purple-600 hover:opacity-80 transition-opacity cursor-pointer">Tasky</a>
+            <div class="space-x-4">
+                <a href="index.html" class="text-gray-600 hover:text-purple-600">Home</a>
+                <a href="browsetask.html" class="text-gray-600 hover:text-purple-600">Browse Tasks</a>
+                <a href="#" id="postTaskButton" class="text-gray-600 hover:text-purple-600">Post Task</a>
+                <a href="login.html" class="text-purple-600 hover:text-purple-800">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex justify-center items-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 text-center">Create an Account</h2>
+            <form id="signupForm">
+                <div class="mb-4">
+                    <input type="text" id="username" name="username" placeholder="Username *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="firstName" name="firstName" placeholder="First Name *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="lastName" name="lastName" placeholder="Last Name *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <div class="mb-4">
+                    <input type="email" id="email" name="email" placeholder="Email Address *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="password" name="password" placeholder="Password *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                </div>
+                <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">Sign Up</button>
+            </form>
+
+            <div class="flex items-center my-4">
+                <hr class="flex-grow border-t border-gray-300">
+                <span class="mx-4 text-gray-500">OR</span>
+                <hr class="flex-grow border-t border-gray-300">
+            </div>
+
+            <button class="w-full border border-gray-300 text-gray-600 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100">
+                <i class="fab fa-google mr-2"></i> Sign Up with Google
+            </button>
+
+            <p class="text-center mt-4 text-gray-600">Already have an account? <a href="login.html" class="text-purple-600 hover:underline">Log in</a></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-purple-600 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-between">
+                <div class="w-full md:w-1/3 mb-6 md:mb-0">
+                    <h3 class="font-bold text-lg mb-2">Tasky</h3>
+                    <p>Connect with experts who can help with your tasks. Find assignments, freelance work, and more.</p>
+                </div>
+                <div class="w-full md:w-1/3 mb-6 md:mb-0">
+                    <h3 class="font-bold text-lg mb-2">Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html" class="hover:underline">Home</a></li>
+                        <li><a href="browsetask.html" class="hover:underline">Browse Tasks</a></li>
+                        <li><a href="login.html" class="hover:underline">Post a Task</a></li>
+                        <li><a href="login.html" class="hover:underline">Login</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/3">
+                    <h3 class="font-bold text-lg mb-2">Connect With Us</h3>
+                    <div class="flex space-x-4 mb-2">
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-gray-300"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                    <p><a href="mailto:contact@taskswap.com" class="hover:underline">contact@taskswap.com</a></p>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <p>&copy; 2025 Tasky. All rights reserved.</p>
+                <div class="space-x-4">
+                    <a href="#" class="hover:underline">Privacy</a>
+                    <a href="#" class="hover:underline">Terms</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('username').value,
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
+
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                console.log(result);
+
+                if (response.ok) {
+                    // Store the token in localStorage
+                    localStorage.setItem('token', result.token);
+                    alert('Signup successful!');
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                } else {
+                    alert('Signup failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+    <script src="shared/navigation.js"></script>
+</body>
+</html>

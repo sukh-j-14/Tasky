@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasky | Premium Academic Task Exchange</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            '50': '#faf5ff',
+                            '100': '#f3e8ff',
+                            '200': '#e9d5ff',
+                            '300': '#d8b4fe',
+                            '400': '#c084fc',
+                            '500': '#a855f7',
+                            '600': '#9333ea',
+                            '700': '#7e22ce',
+                            '800': '#6b21a8',
+                            '900': '#581c87',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"DM Sans"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .purple-glow {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+        }
+        .hover-scale {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .hover-scale:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        .nav-link {
+            position: relative;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%);
+            transition: width 0.4s ease;
+        }
+        .nav-link:hover:after {
+            width: 100%;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #a855f7 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shadow-md">
+                            <i class="fas fa-tasks text-white text-lg"></i>
+                        </div>
+                        <span class="ml-3 text-2xl font-bold bg-gradient-to-r from-purple-600 to-purple-400 bg-clip-text text-transparent" style="background-clip: text;">Tasky</span>
+                    </a>
+                    <div class="hidden lg:ml-12 lg:flex lg:space-x-8">
+                        <a href="index.html" class="nav-link text-gray-900 inline-flex items-center px-1 pt-1 text-base font-medium">Home</a>
+                        <a href="browsetask.html" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">Browse Tasks</a>
+                        <a href="#" id="postTaskButton" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">Post Task</a>
+                        <a href="#" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">How It Works</a>
+                    </div>
+                </div>
+                <div class="hidden lg:ml-6 lg:flex lg:items-center space-x-6">
+                    <!-- Login/Signup buttons (shown when not logged in) -->
+                    <div id="loginSection">
+                        <a href="login.html" id="loginButton" class="text-base font-medium text-gray-900 hover:text-purple-600">Login</a>
+                        <a href="signup.html" id="signupButton" class="ml-3 inline-flex items-center px-5 py-2.5 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-700 hover:to-purple-500 focus:outline-none purple-glow">
+                            Sign Up
+                        </a>
+                    </div>
+                    
+                    <!-- Profile dropdown (shown when logged in) -->
+                    <div id="profileSection" class="relative" style="display: none;">
+                        <button id="profileDropdown" class="flex text-sm rounded-full focus:outline-none ring-2 ring-purple-500 ring-offset-2">
+                            <img id="profileImage" class="h-9 w-9 rounded-full" src="https://via.placeholder.com/40" alt="Profile">
+                        </button>
+                        <div id="dropdownMenu" class="hidden origin-top-right absolute right-0 mt-3 w-56 rounded-xl shadow-lg py-2 bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100">
+                            <div class="px-4 py-3">
+                                <p id="profileName" class="text-sm font-medium text-gray-900">User</p>
+                                <p id="profileMajor" class="text-xs text-purple-600">Student</p>
+                            </div>
+                            <div class="py-1">
+                                <a href="dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">Dashboard</a>
+                                <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">My Profile</a>
+                                <a href="mytasks.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">My Tasks</a>
+                                <a href="messages.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">Messages</a>
+                            </div>
+                            <div class="py-1">
+                                <a href="#" id="logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50">Logout</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative pt-32 pb-24 px-6 sm:pt-40 sm:pb-32 lg:pt-48 lg:pb-40 lg:px-8">
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80')] bg-cover bg-center opacity-20"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-purple-900/10 to-purple-900/30"></div>
+        </div>
+        <div class="relative max-w-7xl mx-auto">
+            <div class="text-center">
+                <h1 class="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+                    <span class="block">Elevate Your</span>
+                    <span class="block gradient-text">Academic Performance</span>
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-xl text-gray-700">
+                    Connect with top students to collaborate on assignments or monetize your academic expertise
+                </p>
+                <div class="mt-10 flex justify-center space-x-4">
+                    <a href="#" id="postTaskBtn" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-purple-700 bg-white hover:bg-gray-50 focus:outline-none hover-scale purple-glow">
+                        <span>Post a Task</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="browsetask.html" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-800 to-purple-600 hover:from-purple-900 hover:to-purple-700 focus:outline-none hover-scale purple-glow">
+                        <span>Browse Tasks</span>
+                        <i class="fas fa-search ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="relative bg-white py-16">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+                <div class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white">
+                    <p class="text-4xl font-bold text-purple-600">5,000+</p>
+                    <p class="mt-2 text-sm font-medium text-gray-500">ACTIVE STUDENTS</p>
+                </div>
+                <div class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white">
+                    <p class="text-4xl font-bold text-purple-600">12K</p>
+                    <p class="mt-2 text-sm font-medium text-gray-500">TASKS COMPLETED</p>
+                </div>
+                <div class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white">
+                    <p class="text-4xl font-bold text-purple-600">4.9/5</p>
+                    <p class="mt-2 text-sm font-medium text-gray-500">AVERAGE RATING</p>
+                </div>
+                <div class="text-center p-6 rounded-xl hover-scale bg-gradient-to-br from-purple-50 to-white">
+                    <p class="text-4xl font-bold text-purple-600">100+</p>
+                    <p class="mt-2 text-sm font-medium text-gray-500">UNIVERSITIES</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="relative py-24 bg-gradient-to-b from-white to-purple-50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-base font-semibold tracking-wider text-purple-600 uppercase">Why Tasky</h2>
+                <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                    The premium academic task platform
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-600 mx-auto">
+                    Designed for students who demand excellence in academic support
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
+                <div class="hover-scale bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="h-48 bg-gradient-to-r from-purple-500 to-purple-300 flex items-center justify-center">
+                        <i class="fas fa-user-shield text-white text-5xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Verified Experts</h3>
+                        <p class="text-gray-600">
+                            All helpers are vetted students with proven academic records in their subjects, ensuring quality assistance.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="hover-scale bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="h-48 bg-gradient-to-r from-purple-500 to-purple-300 flex items-center justify-center">
+                        <i class="fas fa-lock text-white text-5xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Secure Platform</h3>
+                        <p class="text-gray-600">
+                            End-to-end encrypted messaging and secure payments protect your privacy and academic integrity.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="hover-scale bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div class="h-48 bg-gradient-to-r from-purple-500 to-purple-300 flex items-center justify-center">
+                        <i class="fas fa-star text-white text-5xl"></i>
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Quality Assurance</h3>
+                        <p class="text-gray-600">
+                            Our rating system and quality checks ensure you receive work that meets the highest academic standards.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="relative py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+                <div class="mb-12 lg:mb-0">
+                    <h2 class="text-base font-semibold tracking-wider text-purple-600 uppercase">Process</h2>
+                    <p class="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+                        How Tasky Works
+                    </p>
+                    <p class="mt-4 text-xl text-gray-600">
+                        Simple steps to get academic help or earn money helping others
+                    </p>
+
+                    <div class="mt-12 space-y-10">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 text-purple-600 font-bold text-lg">
+                                    1
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-900">Create Your Task</h3>
+                                <p class="mt-2 text-gray-600">
+                                    Describe what you need help with, set your budget and deadline. Our AI will suggest the best category.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 text-purple-600 font-bold text-lg">
+                                    2
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-900">Review Proposals</h3>
+                                <p class="mt-2 text-gray-600">
+                                    Qualified students will send you offers with their qualifications and proposed solutions.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-purple-100 text-purple-600 font-bold text-lg">
+                                    3
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-xl font-bold text-gray-900">Collaborate Securely</h3>
+                                <p class="mt-2 text-gray-600">
+                                    Use our platform to communicate, share files, and track progress until your task is complete.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="relative rounded-2xl shadow-2xl overflow-hidden">
+                        <img class="w-full h-auto" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Students collaborating">
+                        <div class="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-purple-900/10"></div>
+                    </div>
+                    <div class="absolute -bottom-8 -left-8 bg-white p-6 rounded-2xl shadow-xl w-64 hover-scale">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-purple-100 p-3 rounded-lg">
+                                <i class="fas fa-check text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Tasks Completed</p>
+                                <p class="text-2xl font-bold text-purple-600">12,453</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="relative py-24 bg-purple-900 text-white">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')] bg-cover bg-center"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 relative">
+            <div class="text-center mb-20">
+                <h2 class="text-base font-semibold tracking-wider text-purple-300 uppercase">Testimonials</h2>
+                <p class="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+                    What our users say
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+                <div class="glass-card p-8 rounded-2xl hover-scale">
+                    <div class="flex items-center mb-6">
+                        <img class="w-12 h-12 rounded-full border-2 border-purple-300" src="https://randomuser.me/api/portraits/women/43.jpg" alt="Emma">
+                        <div class="ml-4">
+                            <p class="font-bold">Emma Wilson</p>
+                            <p class="text-purple-300 text-sm">Computer Science, Stanford</p>
+                        </div>
+                    </div>
+                    <p class="italic">
+                        "Tasky helped me maintain my 4.0 GPA during my study abroad semester when I was struggling with language barriers. The quality of help I received was exceptional."
+                    </p>
+                    <div class="mt-4 flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl hover-scale">
+                    <div class="flex items-center mb-6">
+                        <img class="w-12 h-12 rounded-full border-2 border-purple-300" src="https://randomuser.me/api/portraits/men/32.jpg" alt="James">
+                        <div class="ml-4">
+                            <p class="font-bold">James Chen</p>
+                            <p class="text-purple-300 text-sm">Engineering, MIT</p>
+                        </div>
+                    </div>
+                    <p class="italic">
+                        "I've earned over $3,000 helping other students with physics and calculus while reinforcing my own knowledge. The perfect side hustle for any STEM major."
+                    </p>
+                    <div class="mt-4 flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-2xl hover-scale">
+                    <div class="flex items-center mb-6">
+                        <img class="w-12 h-12 rounded-full border-2 border-purple-300" src="https://randomuser.me/api/portraits/women/28.jpg" alt="Sophia">
+                        <div class="ml-4">
+                            <p class="font-bold">Sophia Rodriguez</p>
+                            <p class="text-purple-300 text-sm">Business, NYU</p>
+                        </div>
+                    </div>
+                    <p class="italic">
+                        "As an international student, Tasky was invaluable for getting help with writing papers in English. The editors were patient and helped me improve my skills."
+                    </p>
+                    <div class="mt-4 flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="relative py-24 bg-gradient-to-br from-purple-900 to-purple-700 text-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+                <div class="mb-12 lg:mb-0">
+                    <h2 class="text-4xl font-bold tracking-tight sm:text-5xl mb-6">
+                        Ready to transform your academic experience?
+                    </h2>
+                    <p class="text-xl text-purple-100 mb-8">
+                        Join thousands of students who are achieving more with less stress.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="login.html" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-purple-700 bg-white hover:bg-gray-50 focus:outline-none hover-scale purple-glow">
+                            Get Started
+                        </a>
+                        <a href="browsetask.html" class="inline-flex items-center px-8 py-3.5 border border-white text-base font-medium rounded-full shadow-sm text-white bg-transparent hover:bg-white/10 focus:outline-none hover-scale">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                        <img class="w-full h-auto" src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Happy students">
+                        <div class="absolute inset-0 bg-gradient-to-t from-purple-900/60 to-purple-900/20"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto py-16 px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12">
+                <div class="col-span-2">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shadow-md">
+                            <i class="fas fa-tasks text-white text-lg"></i>
+                        </div>
+                        <span class="ml-3 text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent" style="background-clip: text;">Tasky</span>
+                    </div>
+                    <p class="mt-4 text-gray-400">
+                        The premium platform for student academic collaboration and support.
+                    </p>
+                    <div class="mt-6 flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-purple-400 uppercase">Solutions</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li><a href="#" class="text-gray-300 hover:text-white">Assignment Help</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Research Papers</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Lab Reports</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Presentation Design</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold tracking-wider text-purple-400 uppercase">Company</h3>
+                    <ul class="mt-4 space-y-3">
+                        <li><a href="#" class="text-gray-300 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Careers</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Academic Integrity</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-16 pt-10 border-t border-gray-800 flex flex-col md:flex-row justify-between">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2025 Tasky. All rights reserved.
+                </p>
+                <div class="mt-4 md:mt-0 flex space-x-8">
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm">Cookie Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Navigation Script -->
+    <script src="shared/navigation.js"></script>
+    <script>
+
+
+    </script>
+</body>
+</html>

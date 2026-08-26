@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Bids | Tasky</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .purple-glow {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+        }
+        .hover-scale {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .hover-scale:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-purple-600">Tasky</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-gray-700 hover:text-purple-600">Dashboard</a>
+                    <a href="browsetask.html" class="text-gray-700 hover:text-purple-600">Browse Tasks</a>
+                    <a href="mytasks.html" class="text-gray-700 hover:text-purple-600">My Tasks</a>
+                    <a href="profile.html" class="text-gray-700 hover:text-purple-600">Profile</a>
+                    
+                    <!-- Login/Signup buttons (shown when not logged in) -->
+                    <div id="loginSection" style="display: none;">
+                        <a href="login.html" class="text-gray-700 hover:text-purple-600 mr-4">Login</a>
+                        <a href="signup.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">Sign Up</a>
+                    </div>
+                    
+                    <!-- Profile dropdown (shown when logged in) -->
+                    <div id="profileSection" class="relative" style="display: none;">
+                        <button id="profileDropdown" class="flex items-center space-x-2 focus:outline-none">
+                            <img id="profileImage" src="https://via.placeholder.com/40" alt="Profile" class="w-8 h-8 rounded-full">
+                            <span id="profileName" class="text-gray-700">User</span>
+                            <i class="fas fa-chevron-down text-gray-400"></i>
+                        </button>
+                        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <a href="dashboard.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                            </a>
+                            <a href="profile.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-user mr-2"></i>Profile
+                            </a>
+                            <a href="mytasks.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-tasks mr-2"></i>My Tasks
+                            </a>
+                            <a href="messages.html" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                                <i class="fas fa-envelope mr-2"></i>Messages
+                            </a>
+                            <hr class="my-2">
+                            <a href="#" id="logout" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="flex justify-center items-center min-h-screen">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading bids...</p>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <h2 class="text-xl font-semibold text-red-800 mb-2">Access Denied</h2>
+            <p class="text-red-600 mb-4">You don't have permission to view bids for this task.</p>
+            <a href="mytasks.html" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700">Back to My Tasks</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" class="hidden max-w-6xl mx-auto px-4 py-8">
+        <!-- Task Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1">
+                    <h1 id="taskTitle" class="text-3xl font-bold text-gray-900 mb-2"></h1>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                        <span id="taskCategory" class="flex items-center">
+                            <i class="fas fa-tag mr-1"></i>
+                            <span></span>
+                        </span>
+                        <span id="taskDeadline" class="flex items-center">
+                            <i class="fas fa-calendar mr-1"></i>
+                            <span></span>
+                        </span>
+                        <span id="taskBudget" class="flex items-center">
+                            <i class="fas fa-rupee-sign mr-1"></i>
+                            <span></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span id="taskStatus" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
+                    <a href="mytasks.html" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bids Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-900">
+                    <i class="fas fa-hand-holding-usd mr-2 text-purple-600"></i>
+                    Bids for this Task
+                </h2>
+                <div class="text-sm text-gray-500">
+                    <span id="bidsCount">0</span> bids received
+                </div>
+            </div>
+
+            <!-- Bids List -->
+            <div id="bidsList" class="space-y-4">
+                <!-- Bids will be loaded here -->
+            </div>
+
+            <!-- No Bids Message -->
+            <div id="noBidsMessage" class="hidden text-center py-12">
+                <div class="inline-block p-6 rounded-full bg-purple-50 text-purple-600 mb-4">
+                    <i class="fas fa-hand-holding-usd text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No bids yet</h3>
+                <p class="text-gray-600">This task hasn't received any bids yet. Check back later!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bid Card Template -->
+    <template id="bidCardTemplate">
+        <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <img id="bidderAvatar" src="https://via.placeholder.com/48" alt="Bidder" class="w-12 h-12 rounded-full object-cover">
+                    </div>
+                    <div>
+                        <h3 id="bidderName" class="font-semibold text-gray-900"></h3>
+                        <div class="flex items-center space-x-2 text-sm text-gray-500">
+                            <span id="bidderRating" class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span></span>
+                            </span>
+                            <span id="bidDate" class="flex items-center">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div id="bidAmount" class="text-2xl font-bold text-purple-600"></div>
+                    <div class="text-sm text-gray-500">Bid Amount</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="font-medium text-gray-900 mb-2">Bid Message:</h4>
+                <p id="bidMessage" class="text-gray-700 bg-gray-50 p-3 rounded-lg"></p>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span id="proposedTimeline" class="flex items-center">
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        <span></span> days
+                    </span>
+                    <span id="bidStatus" class="px-2 py-1 rounded-full text-xs font-semibold"></span>
+                </div>
+                <div id="bidActions" class="flex space-x-2">
+                    <!-- Actions will be populated based on user role -->
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="shared/navigation.js"></script>
+    <script>
+        let currentTask = null;
+        let currentUser = null;
+        let currentBids = [];
+
+        // Get task ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskId = urlParams.get('id');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!taskId) {
+                showError();
+                return;
+            }
+            loadTaskBids();
+        });
+
+        async function loadTaskBids() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Load user profile first
+                await loadUserProfile();
+
+                // Load task details and bids
+                const [taskResponse, bidsResponse] = await Promise.all([
+                    fetch(`/api/tasks/${taskId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`/api/bids/task/${taskId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (taskResponse.ok) {
+                    currentTask = await taskResponse.json();
+                } else {
+                    throw new Error('Failed to load task');
+                }
+
+                if (bidsResponse.ok) {
+                    const bidsData = await bidsResponse.json();
+                    currentBids = bidsData.bids || [];
+                } else if (bidsResponse.status === 403) {
+                    showError();
+                    return;
+                } else {
+                    throw new Error('Failed to load bids');
+                }
+
+                displayTaskAndBids();
+
+            } catch (error) {
+                console.error('Error loading task bids:', error);
+                showError();
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/auth/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+
+        function displayTaskAndBids() {
+            if (!currentTask) return;
+
+            // Hide loading, show content
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+
+            // Populate task details
+            document.getElementById('taskTitle').textContent = currentTask.title;
+            document.getElementById('taskCategory').querySelector('span').textContent = currentTask.category;
+            document.getElementById('taskDeadline').querySelector('span').textContent = new Date(currentTask.deadline).toLocaleDateString();
+            document.getElementById('taskBudget').querySelector('span').textContent = `₹${currentTask.budget}`;
+
+            // Status
+            const statusElement = document.getElementById('taskStatus');
+            statusElement.textContent = currentTask.status;
+            statusElement.className = `px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(currentTask.status)}`;
+
+            // Display bids
+            displayBids();
+        }
+
+        function displayBids() {
+            const bidsList = document.getElementById('bidsList');
+            const noBidsMessage = document.getElementById('noBidsMessage');
+            const bidsCount = document.getElementById('bidsCount');
+
+            bidsCount.textContent = currentBids.length;
+
+            if (currentBids.length === 0) {
+                bidsList.innerHTML = '';
+                noBidsMessage.classList.remove('hidden');
+                return;
+            }
+
+            noBidsMessage.classList.add('hidden');
+            bidsList.innerHTML = '';
+
+            const template = document.getElementById('bidCardTemplate');
+
+            console.log('All bids in task-bids:', currentBids); // Debug log
+            currentBids.forEach(bid => {
+                console.log('Processing bid:', bid._id, 'Status:', bid.status); // Debug log
+                const clone = template.content.cloneNode(true);
+
+                // Populate bidder info
+                const bidder = bid.bidderId || bid.bidder;
+                if (bidder) {
+                    clone.querySelector('#bidderName').textContent = `${bidder.firstName} ${bidder.lastName}`;
+                    clone.querySelector('#bidderRating').querySelector('span').textContent = bidder.rating || 'N/A';
+                    
+                    if (bidder.profilePicture) {
+                        clone.querySelector('#bidderAvatar').src = bidder.profilePicture;
+                    }
+                }
+
+                // Populate bid details
+                clone.querySelector('#bidAmount').textContent = `₹${bid.amount}`;
+                clone.querySelector('#bidMessage').textContent = bid.message || 'No message provided';
+                clone.querySelector('#proposedTimeline').querySelector('span').textContent = bid.proposedTimeline || 'N/A';
+                clone.querySelector('#bidDate').querySelector('span').textContent = new Date(bid.createdAt).toLocaleDateString();
+
+                // Status
+                const statusElement = clone.querySelector('#bidStatus');
+                statusElement.textContent = bid.status;
+                statusElement.className = `px-2 py-1 rounded-full text-xs font-semibold ${getBidStatusColor(bid.status)}`;
+
+                // Actions based on user role
+                const actionsDiv = clone.querySelector('#bidActions');
+                if (currentUser && currentTask.clientId._id === currentUser._id && currentTask.status === 'open') {
+                    if (bid.status === 'pending') {
+                        actionsDiv.innerHTML = `
+                            <button onclick="contactBidder('${bid._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 mr-2">
+                                Contact
+                            </button>
+                            <button onclick="acceptBid('${bid._id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                Accept
+                            </button>
+                            <button onclick="rejectBid('${bid._id}')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
+                                Reject
+                            </button>
+                        `;
+                    } else {
+                        actionsDiv.innerHTML = `
+                            <span class="text-sm text-gray-500 mr-2">${bid.status}</span>
+                            <button onclick="contactBidder('${bid._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                Contact
+                            </button>
+                        `;
+                    }
+                } else {
+                    actionsDiv.innerHTML = `
+                        <button onclick="contactBidder('${bid._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                            Contact
+                        </button>
+                    `;
+                }
+
+                bidsList.appendChild(clone);
+            });
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'open': return 'bg-green-100 text-green-800';
+                case 'in-progress': return 'bg-blue-100 text-blue-800';
+                case 'completed': return 'bg-gray-100 text-gray-800';
+                case 'cancelled': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function getBidStatusColor(status) {
+            switch (status) {
+                case 'pending': return 'bg-yellow-100 text-yellow-800';
+                case 'accepted': return 'bg-green-100 text-green-800';
+                case 'rejected': return 'bg-red-100 text-red-800';
+                case 'withdrawn': return 'bg-gray-100 text-gray-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showError() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        async function acceptBid(bidId) {
+            if (!confirm('Are you sure you want to accept this bid? This will close the task to other bidders.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/bids/${bidId}/accept`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        platformFee: 1,
+                        totalAmount: currentBids.find(b => b._id === bidId).amount + 1
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Bid accepted successfully!');
+                    loadTaskBids(); // Reload to show updated status
+                } else {
+                    const error = await response.json();
+                    alert('Failed to accept bid: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error accepting bid:', error);
+                alert('Error accepting bid. Please try again.');
+            }
+        }
+
+        async function rejectBid(bidId) {
+            if (!confirm('Are you sure you want to reject this bid?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/bids/${bidId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        reason: 'Not selected'
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Bid rejected successfully!');
+                    loadTaskBids(); // Reload to show updated status
+                } else {
+                    const error = await response.json();
+                    alert('Failed to reject bid: ' + error.message);
+                }
+            } catch (error) {
+                console.error('Error rejecting bid:', error);
+                alert('Error rejecting bid. Please try again.');
+            }
+        }
+
+        function contactBidder(bidId) {
+            // Find the bid to get the bidder information
+            console.log('Contact bidder function called!'); // Debug log
+            const bid = currentBids.find(b => b._id === bidId);
+            if (!bid) {
+                alert('Bid not found');
+                return;
+            }
+
+            console.log('Bid data:', bid); // Debug log
+            
+            const bidder = bid.bidderId || bid.bidder;
+            if (!bidder || !bidder._id) {
+                console.log('Bidder data:', bidder); // Debug log
+                alert('Bidder information not available');
+                return;
+            }
+
+            // Open chat with the bidder
+            const chatUrl = `chat.html?taskId=${currentTask._id}&bidId=${bidId}&participantId=${bidder._id}`;
+            console.log('Opening chat URL:', chatUrl); // Debug log
+            console.log('Task ID:', currentTask._id); // Debug log
+            console.log('Bid ID:', bidId); // Debug log
+            console.log('Bidder ID:', bidder._id); // Debug log
+            window.open(chatUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

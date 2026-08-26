@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasky - Log In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-xl font-semibold text-gray-900">Tasky</span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="index.html" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">Home</a>
+                    <a href="browsetask.html" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">Browse Tasks</a>
+                    <a href="#" id="postTaskButton" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium">Post Task</a>
+                    <a href="login.html" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-purple-500 text-sm font-medium">Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Log In</h2>
+            </div>
+            <form id="loginForm" class="mt-8 space-y-6">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="email" class="sr-only">Email address</label>
+                        <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Email Address *">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm" placeholder="Password *">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Log In
+                    </button>
+                </div>
+
+
+                <div class="text-center text-sm text-gray-600">
+                    Don't have an account? <a href="signup.html" class="font-medium text-purple-600 hover:text-purple-500">Sign up</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-purple-600 text-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+            <div class="flex justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold">Tasky</h3>
+                    <p class="mt-2 text-sm">Connect with experts who can help with your tasks. Find assignments, freelance work, and more.</p>
+                    <p class="mt-2 text-sm">© 2025 Tasky. All rights reserved.</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold">Quick Links</h3>
+                    <ul class="mt-2 space-y-2">
+                        <li><a href="index.html" class="text-sm">Home</a></li>
+                        <li><a href="browsetask.html" class="text-sm">Browse Tasks</a></li>
+                        <li><a href="login.html" class="text-sm">Post a Task</a></li>
+                        <li><a href="login.html" class="text-sm">Login</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold">Connect With Us</h3>
+                    <ul class="mt-2 space-y-2">
+                        <li class="flex space-x-2">
+                            <a href="#" class="text-sm"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="text-sm"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-sm"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="text-sm"><i class="fab fa-linkedin"></i></a>
+                        </li>
+                        <li class="text-sm">contact@tasky.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-between text-sm">
+                <a href="#" class="text-white">Privacy</a>
+                <a href="#" class="text-white">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                console.log(result);
+
+                if (response.ok) {
+                    // Store the token in localStorage
+                    localStorage.setItem('token', result.token); // Assuming the backend returns a token
+                    alert('Login successful!');
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard after login
+                } else {
+                    alert('Login failed: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+
+    </script>
+    <script src="shared/navigation.js"></script>
+</body>
+</html>
