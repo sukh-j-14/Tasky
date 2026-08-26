@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewars/auth.middleware');
 const multer = require('multer');
 const path = require('path');
+const os = require('os');
 
 // Public auth routes
 router.post('/signup', authMiddleware.rateLimit(10, 15 * 60 * 1000), authController.signup);
@@ -13,7 +14,7 @@ router.post('/login', authMiddleware.rateLimit(20, 15 * 60 * 1000), authControll
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/')
+    cb(null, process.env.VERCEL ? os.tmpdir() : path.join(process.cwd(), 'uploads'))
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
