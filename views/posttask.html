@@ -166,7 +166,7 @@
       </div>
 
       <!-- Task Details Form -->
-      <form id="taskForm" class="bg-white rounded-2xl shadow-lg p-8">
+      <form id="taskForm" class="bg-white rounded-2xl shadow-lg p-8" novalidate>
         <!-- Step 1: Task Details -->
         <div class="form-step active" id="step1">
           <div class="mb-6">
@@ -346,6 +346,9 @@
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               required
             />
+            <p id="contactEmailError" class="hidden mt-2 text-sm text-red-600" role="alert">
+              Enter a valid email address, for example name@example.com.
+            </p>
           </div>
 
           <div class="mb-6">
@@ -524,6 +527,7 @@
             </button>
             <button
               type="submit"
+              id="submitTaskButton"
               class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition duration-200 purple-glow"
             >
               Submit Task
@@ -680,13 +684,25 @@
             return false;
           }
         } else if (step === 2) {
-          const name = document.getElementById("contactName").value;
-          const email = document.getElementById("contactEmail").value;
+          const name = document.getElementById("contactName").value.trim();
+          const emailInput = document.getElementById("contactEmail");
+          const email = emailInput.value.trim();
+          const emailError = document.getElementById("contactEmailError");
 
           if (!name || !email) {
             alert("Please fill in all required fields");
             return false;
           }
+
+          if (!emailInput.checkValidity()) {
+            emailError.classList.remove("hidden");
+            emailInput.classList.add("border-red-500");
+            emailInput.focus();
+            return false;
+          }
+
+          emailError.classList.add("hidden");
+          emailInput.classList.remove("border-red-500");
         }
         return true;
       }
@@ -760,12 +776,27 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
+          if (!validateStep(1)) {
+            currentStep = 1;
+            updateStepIndicator();
+            return;
+          }
+
+          if (!validateStep(2)) {
+            currentStep = 2;
+            updateStepIndicator();
+            return;
+          }
+
           if (!document.getElementById("termsAgreement").checked) {
             alert("Please agree to the terms and conditions");
             return;
           }
 
           try {
+            const submitButton = document.getElementById("submitTaskButton");
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
             // Get or create user ID
             let userId = localStorage.getItem("tasky_userId");
             if (!userId) {
@@ -838,8 +869,19 @@
           } catch (error) {
             console.error("Error:", error);
             alert("Task submission failed: " + error.message);
+          } finally {
+            const submitButton = document.getElementById("submitTaskButton");
+            submitButton.disabled = false;
+            submitButton.textContent = "Submit Task";
           }
         });
+
+      document.getElementById("contactEmail").addEventListener("input", function () {
+        if (this.checkValidity()) {
+          document.getElementById("contactEmailError").classList.add("hidden");
+          this.classList.remove("border-red-500");
+        }
+      });
       // Check authentication on page load
       document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('token');
