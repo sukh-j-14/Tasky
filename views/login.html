@@ -49,6 +49,9 @@
                     </button>
                 </div>
 
+                <div class="flex items-center gap-3"><hr class="flex-1"><span class="text-sm text-gray-500">OR</span><hr class="flex-1"></div>
+                <div id="googleLoginButton" class="w-full flex justify-center"></div>
+
 
                 <div class="text-center text-sm text-gray-600">
                     Don't have an account? <a href="signup.html" class="font-medium text-purple-600 hover:text-purple-500">Sign up</a>
@@ -127,6 +130,9 @@
         });
 
     </script>
+    <script src="shared/google-auth.js"></script>
+    <script>initTaskyGoogleAuth({ containerId: 'googleLoginButton' });</script>
     <script src="shared/navigation.js"></script>
 </body>
 </html>
+

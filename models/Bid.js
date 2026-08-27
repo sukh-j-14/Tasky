@@ -104,3 +104,4 @@ const Bid = mongoose.model('Bid', bidSchema);
 
 module.exports = Bid;
 
+

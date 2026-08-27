@@ -39,10 +39,10 @@
                     <input type="email" id="email" name="email" placeholder="Email Address *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
                 </div>
                 <div class="mb-4">
-                    <input type="password" id="password" name="password" placeholder="Password *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                    <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Password * (at least 8 characters)" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
                 </div>
                 <div class="mb-4">
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+                    <input type="password" id="confirmPassword" name="confirmPassword" minlength="8" autocomplete="new-password" placeholder="Confirm Password *" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
                 </div>
                 <button type="submit" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700">Sign Up</button>
             </form>
@@ -53,9 +53,7 @@
                 <hr class="flex-grow border-t border-gray-300">
             </div>
 
-            <button class="w-full border border-gray-300 text-gray-600 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100">
-                <i class="fab fa-google mr-2"></i> Sign Up with Google
-            </button>
+            <div id="googleSignupButton" class="w-full flex justify-center"></div>
 
             <p class="text-center mt-4 text-gray-600">Already have an account? <a href="login.html" class="text-purple-600 hover:underline">Log in</a></p>
         </div>
@@ -102,12 +100,18 @@
     <script>
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
             const data = {
                 username: document.getElementById('username').value,
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
+                password,
             };
 
             try {
@@ -125,7 +129,7 @@
                     alert('Signup successful!');
                     window.location.href = 'dashboard.html'; // Redirect to dashboard
                 } else {
-                    alert('Signup failed: ' + result.error);
+                    alert('Signup failed: ' + (result.error || result.message || 'Please check your details.'));
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -133,6 +137,9 @@
             }
         });
     </script>
+    <script src="shared/google-auth.js"></script>
+    <script>initTaskyGoogleAuth({ containerId: 'googleSignupButton' });</script>
     <script src="shared/navigation.js"></script>
 </body>
 </html>
+

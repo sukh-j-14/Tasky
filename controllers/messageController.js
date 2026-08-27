@@ -246,7 +246,7 @@ exports.editMessage = async (req, res) => {
     }
 
     // Check if user is the sender
-    if (existingMessage.senderId.toString() !== userId) {
+    if (existingMessage.senderId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Only sender can edit message' });
     }
 
@@ -442,7 +442,7 @@ exports.searchMessages = async (req, res) => {
     if (conversationId) {
       // Check if user is participant in conversation
       const conversation = await Conversation.findById(conversationId);
-      if (!conversation || !conversation.participants.includes(userId)) {
+      if (!conversation || !conversation.participants.some(id => id.toString() === userId.toString())) {
         return res.status(403).json({ message: 'Access denied' });
       }
       searchQuery.conversationId = conversationId;
@@ -485,7 +485,7 @@ exports.sendUpdateRequest = async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    if (task.clientId.toString() !== userId) {
+    if (task.clientId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Only task owner can send update requests' });
     }
 
@@ -513,12 +513,16 @@ exports.sendUpdateRequest = async (req, res) => {
       conversationId: conversation._id,
       senderId: userId,
       receiverId: task.selectedFreelancerId,
-      content: `Update Request: ${message}`,
-      messageType: 'update_request',
+      message: `Update Request: ${message}`,
+      messageType: 'text',
       isSystemMessage: false
     });
 
     await updateMessage.save();
+
+    conversation.lastMessage = updateMessage._id;
+    conversation.lastMessageAt = new Date();
+    await conversation.save();
 
     res.json({ 
       message: 'Update request sent successfully',
@@ -530,3 +534,4 @@ exports.sendUpdateRequest = async (req, res) => {
     res.status(500).json({ message: 'Failed to send update request' });
   }
 };
+

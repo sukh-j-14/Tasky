@@ -43,3 +43,4 @@ router.get('/search', messageController.searchMessages);
 router.post('/send-update-request', messageController.sendUpdateRequest);
 
 module.exports = router;
+

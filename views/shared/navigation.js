@@ -192,3 +192,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.navigation = new Navigation();
     }, 100);
 });
+

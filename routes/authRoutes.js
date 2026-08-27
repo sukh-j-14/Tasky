@@ -10,6 +10,8 @@ const os = require('os');
 // Public auth routes
 router.post('/signup', authMiddleware.rateLimit(10, 15 * 60 * 1000), authController.signup);
 router.post('/login', authMiddleware.rateLimit(20, 15 * 60 * 1000), authController.login);
+router.get('/google/config', authController.getGoogleConfig);
+router.post('/google', authMiddleware.rateLimit(20, 15 * 60 * 1000), authController.googleAuth);
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -61,3 +63,4 @@ router.get('/dashboard', authMiddleware.authenticateUser, userController.getDash
 router.get('/tasks', authMiddleware.authenticateUser, userController.getTasks);
 
 module.exports = router;
+

@@ -1,5 +1,29 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
+
+const setAuthCookie = (res, token) => {
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+};
+
+const publicUser = (user) => ({
+  id: user._id,
+  username: user.username,
+  email: user.email,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  isFreelancer: user.isFreelancer,
+  skills: user.skills,
+  rating: user.rating,
+  profilePicture: user.profilePicture,
+  walletBalance: user.walletBalance
+});
 
 // Signup
 exports.signup = async (req, res) => {
@@ -32,8 +56,8 @@ exports.signup = async (req, res) => {
       username: username.trim(),
       email: email.trim().toLowerCase(),
       password, 
-      firstName, 
-      lastName,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       isFreelancer,
       skills,
       hourlyRate,
@@ -43,19 +67,11 @@ exports.signup = async (req, res) => {
     
     const token = user.generateAuthToken();
     await user.save();
+    setAuthCookie(res, token);
     
     res.status(201).json({ 
       message: 'User created successfully',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isFreelancer: user.isFreelancer,
-        skills: user.skills,
-        rating: user.rating
-      },
+      user: publicUser(user),
       token 
     });
   } catch (error) {
@@ -92,32 +108,75 @@ exports.login = async (req, res) => {
     
     const token = user.generateAuthToken();
     
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    });
+    setAuthCookie(res, token);
     
     res.status(200).json({ 
       message: "Login successful", 
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isFreelancer: user.isFreelancer,
-        skills: user.skills,
-        rating: user.rating,
-        profilePicture: user.profilePicture,
-        walletBalance: user.walletBalance
-      }, 
+      user: publicUser(user),
       token 
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getGoogleConfig = (req, res) => {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    return res.status(503).json({ error: 'Google sign-in is not configured' });
+  }
+  res.json({ clientId: process.env.GOOGLE_CLIENT_ID });
+};
+
+exports.googleAuth = async (req, res) => {
+  try {
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(503).json({ error: 'Google sign-in is not configured' });
+    }
+
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'Google credential is required' });
+    }
+
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+
+    if (!payload?.sub || !payload.email || !payload.email_verified) {
+      return res.status(401).json({ error: 'Google account email is not verified' });
+    }
+
+    const email = payload.email.trim().toLowerCase();
+    let user = await User.findOne({ $or: [{ googleId: payload.sub }, { email }] }).select('+googleId');
+
+    if (!user) {
+      user = new User({
+        username: `google_${payload.sub.slice(-16)}`,
+        email,
+        password: crypto.randomBytes(32).toString('hex'),
+        firstName: payload.given_name || payload.name || 'Google',
+        lastName: payload.family_name || '',
+        profilePicture: payload.picture || '',
+        googleId: payload.sub,
+        isVerified: true,
+        isFreelancer: true
+      });
+    } else if (!user.googleId) {
+      user.googleId = payload.sub;
+      user.isVerified = true;
+    }
+
+    await user.save();
+    const token = user.generateAuthToken();
+    setAuthCookie(res, token);
+    res.json({ message: 'Google sign-in successful', user: publicUser(user), token });
+  } catch (error) {
+    console.error('Google authentication error:', error.message);
+    res.status(401).json({ error: 'Google sign-in could not be verified' });
   }
 };
 // Get user profile
@@ -165,6 +224,11 @@ exports.updateProfile = async (req, res) => {
 // Upload profile picture
 exports.uploadProfilePicture = async (req, res) => {
   try {
+    if (process.env.VERCEL) {
+      return res.status(503).json({
+        message: 'Profile picture uploads are temporarily unavailable until persistent file storage is configured.'
+      });
+    }
     console.log('Upload request received:', req.file);
     
     if (!req.file) {
@@ -210,3 +274,4 @@ exports.logout = (req, res) => {
   res.clearCookie("token");
   res.status(200).json({ message: 'Logged out successfully' });
 };
+

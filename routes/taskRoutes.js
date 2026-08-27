@@ -4,6 +4,18 @@ const authMiddleware = require('../middlewars/auth.middleware')
 const jwt = require("jsonwebtoken")
 const router = express.Router();
 
+const editableTaskFields = [
+  'title', 'description', 'category', 'subcategory', 'contactPhone', 'contactMethod',
+  'budget', 'budgetType', 'hourlyRate', 'estimatedHours', 'deadline', 'startDate',
+  'estimatedDuration', 'skills', 'experienceLevel', 'requirements', 'attachments',
+  'biddingType', 'maxBids', 'biddingEndsAt', 'milestones', 'isPublic', 'isUrgent',
+  'location', 'country', 'city', 'language'
+];
+
+const pickTaskFields = (source) => Object.fromEntries(
+  editableTaskFields.filter(field => source[field] !== undefined).map(field => [field, source[field]])
+);
+
 // Create a new task
 router.post('/', authMiddleware.authenticateUser, async (req, res) => {
   try {
@@ -20,7 +32,7 @@ router.post('/', authMiddleware.authenticateUser, async (req, res) => {
     }
 
     const task = new Task({
-      ...req.body,
+      ...pickTaskFields(req.body),
       clientId: req.user._id,
       email: req.user.email,
       contactName: req.user.firstName + ' ' + req.user.lastName,
@@ -91,21 +103,24 @@ router.get('/', async (req, res) => {
     }
 
     // Build sort object
-    const sort = {};
-    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    const allowedSortFields = ['createdAt', 'deadline', 'budget', 'views'];
+    const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+    const safeLimit = Math.min(50, Math.max(1, Number.parseInt(limit, 10) || 10));
+    const sort = { [safeSortBy]: sortOrder === 'asc' ? 1 : -1 };
 
     const tasks = await Task.find(query)
       .populate('clientId', 'firstName lastName profilePicture rating')
       .sort(sort)
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .limit(safeLimit)
+      .skip((safePage - 1) * safeLimit);
 
     const total = await Task.countDocuments(query);
 
     res.json({
       tasks,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      totalPages: Math.ceil(total / safeLimit),
+      currentPage: safePage,
       total
     });
   } catch (error) {
@@ -145,6 +160,9 @@ router.get('/posted', authMiddleware.authenticateUser, async (req, res) => {
 // Get single task
 router.get('/:id', async (req, res) => {
   try {
+    if (!require('mongoose').isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid task ID' });
+    }
     const task = await Task.findById(req.params.id)
       .populate('clientId', 'firstName lastName profilePicture rating')
       .populate('selectedFreelancerId', 'firstName lastName profilePicture rating');
@@ -166,9 +184,7 @@ router.get('/:id', async (req, res) => {
 // Update task
 router.put('/:id', authMiddleware.authenticateUser, async (req, res) => {
   try {
-    const forbiddenFields = ['clientId', 'selectedBidId', 'selectedFreelancerId', 'paymentId', 'status'];
-    const updates = { ...req.body };
-    forbiddenFields.forEach((field) => delete updates[field]);
+    const updates = pickTaskFields(req.body);
     const updatedTask = await Task.findOneAndUpdate(
       { _id: req.params.id, clientId: req.user._id },
       updates,
@@ -234,7 +250,9 @@ router.post('/:id/complete', authMiddleware.authenticateUser, async (req, res) =
     }
 
     res.json({ 
-      message: 'Task completed successfully. Payment has been released to the freelancer.',
+      message: task.paymentId
+        ? 'Task completed successfully. Payment has been released to the freelancer.'
+        : 'Task completed successfully.',
       task 
     });
 
@@ -274,7 +292,7 @@ router.get('/:id/progress', authMiddleware.authenticateUser, async (req, res) =>
     }
 
     // Check if user is the task owner or selected freelancer
-    if (task.clientId.toString() !== userId && task.selectedFreelancerId?.toString() !== userId) {
+    if (task.clientId.toString() !== userId.toString() && task.selectedFreelancerId?.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -297,3 +315,4 @@ router.get('/:id/progress', authMiddleware.authenticateUser, async (req, res) =>
 });
 
 module.exports = router;
+

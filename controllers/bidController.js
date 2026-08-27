@@ -55,7 +55,7 @@ exports.createBid = async (req, res) => {
     const bidderId = req.user._id;
 
     // Validate required fields
-    if (!taskId || !amount || !message) {
+    if (!taskId || amount === undefined || !message || !proposedTimeline) {
       return res.status(400).json({ 
         message: 'Missing required fields: taskId, amount, message' 
       });
@@ -87,7 +87,7 @@ exports.createBid = async (req, res) => {
     }
 
     // Check if user is the task owner
-    if (task.clientId.toString() === bidderId) {
+    if (task.clientId.toString() === bidderId.toString()) {
       return res.status(400).json({ message: 'You cannot bid on your own task' });
     }
 
@@ -96,8 +96,12 @@ exports.createBid = async (req, res) => {
     // Removed freelancer check - everyone can bid
 
     // Validate bid amount
-    if (amount < 0) {
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
       return res.status(400).json({ message: 'Bid amount must be positive' });
+    }
+
+    if (task.currentBidCount >= task.maxBids) {
+      return res.status(400).json({ message: 'This task has reached its maximum number of bids' });
     }
 
     // Create the bid
@@ -127,7 +131,7 @@ exports.createBid = async (req, res) => {
     await conversation.save();
 
     // Populate bid with user info
-    await bid.populate('bidder', 'firstName lastName profilePicture rating');
+    await bid.populate('bidderId', 'firstName lastName profilePicture rating');
 
     res.status(201).json({
       message: 'Bid created successfully',
@@ -161,7 +165,7 @@ exports.getUserBids = async (req, res) => {
           select: 'firstName lastName _id'
         }
       })
-      .populate('bidder', 'firstName lastName')
+      .populate('bidderId', 'firstName lastName')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -229,41 +233,32 @@ exports.acceptBid = async (req, res) => {
     task.selectedAt = new Date();
     await task.save();
 
-    // Create payment record (escrow)
-    const Payment = require('../models/Payment');
-    const payment = new Payment({
-      taskId: task._id,
-      bidId: bidId,
-      clientId: userId,
-      freelancerId: bid.bidderId,
-      amount: bid.amount,
-      platformFee: platformFee,
-      totalAmount: expectedTotal,
-      status: 'escrowed',
-      type: 'task_payment',
-      description: `Payment for task: ${task.title}`,
-      escrowReleaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-    });
-    await payment.save();
-
-    // Update task with payment info
-    task.paymentId = payment._id;
-    await task.save();
+    // Payment records are created only after a real payment provider is enabled.
+    if (process.env.ENABLE_PAYMENTS === 'true') {
+      const Payment = require('../models/Payment');
+      const payment = new Payment({
+        taskId: task._id,
+        bidId,
+        clientId: userId,
+        freelancerId: bid.bidderId,
+        amount: bid.amount,
+        platformFee,
+        totalAmount: expectedTotal,
+        status: 'escrowed',
+        type: 'task_payment',
+        description: `Payment for task: ${task.title}`,
+        escrowReleaseDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      });
+      await payment.save();
+      task.paymentId = payment._id;
+      await task.save();
+    }
 
     // Reject all other bids for this task
     await Bid.updateMany(
       { taskId: task._id, _id: { $ne: bidId } },
       { status: 'rejected', rejectedAt: new Date() }
     );
-
-    // Update user statistics
-    await User.findByIdAndUpdate(bid.bidderId, { 
-      $inc: { tasksCompleted: 1 } 
-    });
-
-    await User.findByIdAndUpdate(task.clientId, { 
-      $inc: { tasksPosted: 1 } 
-    });
 
     // Create system message
     const conversation = await Conversation.findOne({ 
@@ -364,7 +359,7 @@ exports.withdrawBid = async (req, res) => {
     }
 
     // Check if user is the bidder
-    if (bid.bidderId.toString() !== userId) {
+    if (bid.bidderId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Only bidder can withdraw bid' });
     }
 
@@ -404,7 +399,7 @@ exports.updateBid = async (req, res) => {
     }
 
     // Check if user is the bidder
-    if (bid.bidderId.toString() !== userId) {
+    if (bid.bidderId.toString() !== userId.toString()) {
       return res.status(403).json({ message: 'Only bidder can update bid' });
     }
 
@@ -414,7 +409,12 @@ exports.updateBid = async (req, res) => {
     }
 
     // Update bid fields
-    if (amount !== undefined) bid.amount = amount;
+    if (amount !== undefined) {
+      if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+        return res.status(400).json({ message: 'Bid amount must be positive' });
+      }
+      bid.amount = Number(amount);
+    }
     if (message !== undefined) bid.message = message;
     if (proposedTimeline !== undefined) bid.proposedTimeline = proposedTimeline;
     if (milestones !== undefined) bid.milestones = milestones;
@@ -439,7 +439,7 @@ exports.getBidStats = async (req, res) => {
     const userId = req.user._id;
 
     const stats = await Bid.aggregate([
-      { $match: { bidderId: mongoose.Types.ObjectId(userId) } },
+      { $match: { bidderId: new mongoose.Types.ObjectId(userId) } },
       {
         $group: {
           _id: '$status',
@@ -467,3 +467,4 @@ exports.getBidStats = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch bid statistics' });
   }
 };
+

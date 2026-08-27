@@ -21,6 +21,8 @@ if (!process.env.JWT_SECRET) {
 
 // Initialize the Express app
 const app = express();
+let connectionPromise;
+let server;
 const uploadsDirectory = process.env.VERCEL ? null : path.join(__dirname, 'uploads');
 if (uploadsDirectory) {
   fs.mkdirSync(uploadsDirectory, { recursive: true });
@@ -82,6 +84,33 @@ app.use((req, res, next) => {
   next();
 });
 
+async function connectDB() {
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(
+      process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tasky',
+      { serverSelectionTimeoutMS: 10000 }
+    ).then((mongooseInstance) => {
+      console.log('MongoDB connected');
+      return mongooseInstance.connection;
+    }).catch((error) => {
+      connectionPromise = null;
+      console.error('MongoDB connection error:', error.message);
+      throw error;
+    });
+  }
+  return connectionPromise;
+}
+
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(503).json({ message: 'Database temporarily unavailable' });
+  }
+});
+
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'index.html'));
@@ -124,32 +153,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Database connection
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/tasky', {
-      serverSelectionTimeoutMS: 10000
-    });
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    throw err;
-  }
-};
-
-// Start server
-const startServer = async () => {
-  await connectDB();
-};
-
-let server;
-
-startServer()
-  .then(() => {
+if (!process.env.VERCEL && require.main === module) {
+  connectDB().then(() => {
     const port = process.env.PORT || 5001;
     server = app.listen(port, () => console.log(`Server running on port ${port}`));
   })
   .catch(() => process.exit(1));
+}
 
 const shutdown = (signal) => {
   console.log(`${signal} received; shutting down gracefully`);
@@ -158,7 +168,10 @@ const shutdown = (signal) => {
   setTimeout(() => process.exit(1), 10000).unref();
 };
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+if (!process.env.VERCEL) {
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
 
 module.exports = app;
+

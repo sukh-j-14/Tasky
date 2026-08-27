@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true, trim: true, lowercase: true },
   password: { type: String, required: true, minlength: 8, select: false },
+  googleId: { type: String, unique: true, sparse: true, select: false },
   
   // Profile Information
   firstName: { type: String, required: false, default: '' },
@@ -99,3 +100,4 @@ userSchema.methods.generateAuthToken = function () {
 
 
 module.exports = mongoose.model('User', userSchema);
+
