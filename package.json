@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "smoke:production": "node scripts/smoke-production.mjs",
     "check": "node --check server.js && node --check routes/taskRoutes.js && node --check controllers/authController.js && node --check controllers/bidController.js && node --check controllers/messageController.js && node --check views/shared/google-auth.js"
   },
   "engines": {
