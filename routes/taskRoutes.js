@@ -41,6 +41,7 @@ router.post('/', authMiddleware.authenticateUser, async (req, res) => {
     });
 
     const savedTask = await task.save();
+    await require('../models/User').findByIdAndUpdate(req.user._id, { $inc: { tasksPosted: 1 } });
     console.log('Task saved successfully:', savedTask);
     
     // Populate client info
@@ -225,6 +226,12 @@ router.post('/:id/complete', authMiddleware.authenticateUser, async (req, res) =
     task.status = 'completed';
     task.completedAt = new Date();
     await task.save();
+
+    if (task.selectedFreelancerId) {
+      await require('../models/User').findByIdAndUpdate(task.selectedFreelancerId, {
+        $inc: { tasksCompleted: 1 }
+      });
+    }
 
     // Release payment from escrow
     if (task.paymentId) {
