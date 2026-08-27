@@ -51,7 +51,7 @@ const task = await request('/api/tasks', {
   expected: 201,
   body: {
     title: `${runId} production task`, description: 'Disposable production smoke test task.',
-    category: 'coding', budget: 100, contactMethod: 'email', isPublic: true,
+    category: 'coding', budget: 0, contactMethod: 'email', isPublic: true,
     deadline: new Date(Date.now() + 7 * 86400000).toISOString()
   }
 });
@@ -94,4 +94,3 @@ console.log(JSON.stringify({
   bidId: bidResult.bid._id,
   conversationId: conversation._id
 }));
-

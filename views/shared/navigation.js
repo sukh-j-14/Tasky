@@ -43,6 +43,8 @@ class Navigation {
         
         if (profileSection) profileSection.style.display = 'none';
         if (loginSection) loginSection.style.display = 'block';
+        document.querySelectorAll('[data-auth-only]').forEach((element) => element.style.display = 'none');
+        document.querySelectorAll('[data-guest-only]').forEach((element) => element.style.display = 'block');
         
         // Update Post Task button to redirect to login
         this.updatePostTaskButton(false);
@@ -85,6 +87,8 @@ class Navigation {
             loginSection.style.display = 'none';
             console.log('Login section hidden');
         }
+        document.querySelectorAll('[data-auth-only]').forEach((element) => element.style.display = 'block');
+        document.querySelectorAll('[data-guest-only]').forEach((element) => element.style.display = 'none');
         
         // Update Post Task button to redirect to post task page
         this.updatePostTaskButton(true);
@@ -138,24 +142,49 @@ class Navigation {
             });
         }
 
+        document.querySelectorAll('[data-logout]').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                this.logout();
+            });
+        });
+
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', String(!mobileMenu.classList.contains('hidden')));
+            });
+        }
+
         // Post Task button functionality
-        const postTaskBtn = document.getElementById('postTaskButton');
-        if (postTaskBtn) {
+        document.querySelectorAll('#postTaskButton, #postTaskBtn, [data-post-task]').forEach((postTaskBtn) => {
             postTaskBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.handlePostTaskClick();
             });
-        }
+        });
     }
 
-    logout() {
+    async logout() {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                credentials: 'same-origin'
+            });
+        } catch (error) {
+            console.warn('Server logout failed; clearing the local session.', error);
+        }
         localStorage.removeItem('token');
+        localStorage.removeItem('tasky_userId');
         window.location.href = 'login.html';
     }
 
     updatePostTaskButton(isLoggedIn) {
-        const postTaskBtn = document.getElementById('postTaskButton');
-        if (postTaskBtn) {
+        document.querySelectorAll('#postTaskButton, #postTaskBtn, [data-post-task]').forEach((postTaskBtn) => {
             if (isLoggedIn) {
                 // User is logged in, button should go to post task page
                 postTaskBtn.href = 'posttask.html';
@@ -165,7 +194,7 @@ class Navigation {
                 postTaskBtn.href = 'login.html';
                 postTaskBtn.title = 'Login to post a task';
             }
-        }
+        });
     }
 
     handlePostTaskClick() {
@@ -192,4 +221,3 @@ document.addEventListener('DOMContentLoaded', () => {
         window.navigation = new Navigation();
     }, 100);
 });
-

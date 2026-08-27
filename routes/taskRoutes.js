@@ -22,7 +22,7 @@ router.post('/', authMiddleware.authenticateUser, async (req, res) => {
     console.log('Incoming task data:', req.body);
     
     // Validate required fields
-    if (!req.body.title || !req.body.description || !req.body.category || !req.body.budget) {
+    if (!req.body.title || !req.body.description || !req.body.category || req.body.budget === undefined || req.body.budget === null || req.body.budget === '') {
       return res.status(400).json({ message: 'Missing required fields: title, description, category, budget' });
     }
 
@@ -322,4 +322,3 @@ router.get('/:id/progress', authMiddleware.authenticateUser, async (req, res) =>
 });
 
 module.exports = router;
-

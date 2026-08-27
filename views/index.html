@@ -87,8 +87,8 @@
                     <div class="hidden lg:ml-12 lg:flex lg:space-x-8">
                         <a href="index.html" class="nav-link text-gray-900 inline-flex items-center px-1 pt-1 text-base font-medium">Home</a>
                         <a href="browsetask.html" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">Browse Tasks</a>
-                        <a href="#" id="postTaskButton" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">Post Task</a>
-                        <a href="#" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">How It Works</a>
+                        <a href="login.html" id="postTaskButton" data-post-task class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">Post Task</a>
+                        <a href="about.html" class="nav-link text-gray-500 hover:text-gray-700 inline-flex items-center px-1 pt-1 text-base font-medium">How It Works</a>
                     </div>
                 </div>
                 <div class="hidden lg:ml-6 lg:flex lg:items-center space-x-6">
@@ -122,6 +122,28 @@
                         </div>
                     </div>
                 </div>
+                <button id="mobileMenuButton" class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-purple-700 bg-purple-50" aria-label="Open navigation menu" aria-expanded="false">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div id="mobileMenu" class="hidden lg:hidden pb-5 border-t border-gray-100">
+                <div class="pt-4 grid gap-2">
+                    <a href="index.html" class="px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">Home</a>
+                    <a href="browsetask.html" class="px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">Browse Tasks</a>
+                    <a href="login.html" data-post-task class="px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">Post a Task</a>
+                    <a href="about.html" class="px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">About Tasky</a>
+                    <div data-guest-only class="pt-2 border-t border-gray-100">
+                        <a href="login.html" class="block px-3 py-2 rounded-lg text-purple-700 font-medium">Login</a>
+                        <a href="signup.html" class="block px-3 py-2 rounded-lg text-purple-700 font-medium">Create Account</a>
+                    </div>
+                    <div data-auth-only style="display:none" class="pt-2 border-t border-gray-100">
+                        <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">Dashboard</a>
+                        <a href="profile.html" class="block px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">My Profile</a>
+                        <a href="mytasks.html" class="block px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">My Tasks</a>
+                        <a href="messages.html" class="block px-3 py-2 rounded-lg text-gray-800 hover:bg-purple-50">Messages</a>
+                        <a href="#" data-logout class="block px-3 py-2 rounded-lg text-red-600 hover:bg-red-50">Logout</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -142,7 +164,7 @@
                     Connect with top students to collaborate on assignments or monetize your academic expertise
                 </p>
                 <div class="mt-10 flex justify-center space-x-4">
-                    <a href="#" id="postTaskBtn" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-purple-700 bg-white hover:bg-gray-50 focus:outline-none hover-scale purple-glow">
+                    <a href="login.html" id="postTaskBtn" data-post-task class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-purple-700 bg-white hover:bg-gray-50 focus:outline-none hover-scale purple-glow">
                         <span>Post a Task</span>
                         <i class="fas fa-arrow-right ml-2"></i>
                     </a>
@@ -402,7 +424,7 @@
                         <a href="login.html" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-full shadow-sm text-purple-700 bg-white hover:bg-gray-50 focus:outline-none hover-scale purple-glow">
                             Get Started
                         </a>
-                        <a href="browsetask.html" class="inline-flex items-center px-8 py-3.5 border border-white text-base font-medium rounded-full shadow-sm text-white bg-transparent hover:bg-white/10 focus:outline-none hover-scale">
+                        <a href="about.html" class="inline-flex items-center px-8 py-3.5 border border-white text-base font-medium rounded-full shadow-sm text-white bg-transparent hover:bg-white/10 focus:outline-none hover-scale">
                             Learn More
                         </a>
                     </div>

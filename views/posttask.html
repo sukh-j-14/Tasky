@@ -503,11 +503,11 @@
               class="ml-2 block text-sm text-gray-700"
             >
               I agree to Tasky's
-              <a href="#" class="text-purple-600 hover:text-purple-700"
+              <a href="terms.html" target="_blank" class="text-purple-600 hover:text-purple-700"
                 >Terms of Service</a
               >
               and
-              <a href="#" class="text-purple-600 hover:text-purple-700"
+              <a href="privacy.html" target="_blank" class="text-purple-600 hover:text-purple-700"
                 >Privacy Policy</a
               >. I understand that Tasky is a platform for academic
               collaboration and not for submitting others' work as my own.
@@ -610,10 +610,10 @@
             © 2025 Tasky. All rights reserved.
           </p>
           <div class="mt-4 md:mt-0 flex space-x-6">
-            <a href="#" class="text-gray-400 hover:text-white text-sm"
+            <a href="privacy.html" class="text-gray-400 hover:text-white text-sm"
               >Privacy</a
             >
-            <a href="#" class="text-gray-400 hover:text-white text-sm">Terms</a>
+            <a href="terms.html" class="text-gray-400 hover:text-white text-sm">Terms</a>
           </div>
         </div>
       </div>
@@ -785,7 +785,7 @@
               description: document.getElementById("taskDescription").value,
               category: document.getElementById("taskCategory").value,
               deadline: fullDeadline,
-              budget: document.getElementById("taskBudget").value || 0,
+              budget: Number(document.getElementById("taskBudget").value || 0),
               contactName: document.getElementById("contactName").value,
               contactEmail: document.getElementById("contactEmail").value,
               contactPhone: document.getElementById("contactPhone").value || "",
@@ -855,4 +855,3 @@
     </script>
   </body>
 </html>
-
