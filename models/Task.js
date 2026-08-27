@@ -143,6 +143,10 @@ const taskSchema = new mongoose.Schema({
     ref: 'User' 
   },
   selectedAt: Date,
+  paymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payment'
+  },
   
   // Milestones
   milestones: [{
@@ -321,3 +325,4 @@ taskSchema.pre('save', function(next) {
 const Task = mongoose.model('Task', taskSchema);
 
 module.exports = Task;
+
