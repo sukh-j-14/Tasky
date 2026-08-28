@@ -4,6 +4,24 @@ const User = require('../models/User');
 const { Message, Conversation } = require('../models/Message');
 const mongoose = require('mongoose');
 
+const addBidSystemMessage = async ({ bid, task, senderId, receiverId, message, systemMessageType }) => {
+  const conversation = await Conversation.findOne({ taskId: task._id, bidId: bid._id });
+  if (!conversation) return;
+
+  const systemMessage = await Message.create({
+    conversationId: conversation._id,
+    senderId,
+    receiverId,
+    message,
+    messageType: 'system',
+    isSystemMessage: true,
+    systemMessageType
+  });
+  conversation.lastMessage = systemMessage._id;
+  conversation.lastMessageAt = systemMessage.createdAt;
+  await conversation.save();
+};
+
 // Get all bids for a specific task
 exports.getTaskBids = async (req, res) => {
   try {
@@ -215,6 +233,10 @@ exports.acceptBid = async (req, res) => {
       return res.status(400).json({ message: 'Bid is no longer pending' });
     }
 
+    if (bid.counterOffers?.some(offer => offer.status === 'pending')) {
+      return res.status(400).json({ message: 'Respond to the pending counter-offer before accepting this bid' });
+    }
+
     // Verify total amount (bid amount + platform fee)
     const expectedTotal = bid.amount + platformFee;
     if (totalAmount && totalAmount !== expectedTotal) {
@@ -302,6 +324,113 @@ exports.acceptBid = async (req, res) => {
   } catch (error) {
     console.error('Error accepting bid:', error);
     res.status(500).json({ message: 'Failed to accept bid' });
+  }
+};
+
+// Create a counter-offer. The owner initiates, then the two parties alternate turns.
+exports.createCounterOffer = async (req, res) => {
+  try {
+    const { bidId } = req.params;
+    const amount = Number(req.body.amount);
+    const userId = req.user._id;
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ message: 'Offer amount must be positive' });
+    }
+
+    const bid = await Bid.findById(bidId).populate('taskId');
+    if (!bid) return res.status(404).json({ message: 'Bid not found' });
+
+    const task = bid.taskId;
+    const isOwner = task.clientId.toString() === userId.toString();
+    const isBidder = bid.bidderId.toString() === userId.toString();
+    if (!isOwner && !isBidder) {
+      return res.status(403).json({ message: 'Only the task owner and bidder can negotiate this bid' });
+    }
+    if (task.status !== 'open' || bid.status !== 'pending') {
+      return res.status(400).json({ message: 'Only pending bids on open tasks can be negotiated' });
+    }
+
+    const pendingOffer = bid.counterOffers?.find(offer => offer.status === 'pending');
+    if (!pendingOffer && !isOwner) {
+      return res.status(400).json({ message: 'The task owner must start the bargaining' });
+    }
+    if (pendingOffer?.proposedBy.toString() === userId.toString()) {
+      return res.status(400).json({ message: 'Wait for the other person to respond to your offer' });
+    }
+    if (pendingOffer) {
+      pendingOffer.status = 'countered';
+      pendingOffer.respondedAt = new Date();
+    }
+
+    bid.counterOffers.push({ amount, proposedBy: userId });
+    bid.negotiationStatus = 'negotiating';
+    await bid.save();
+
+    const receiverId = isOwner ? bid.bidderId : task.clientId;
+    await addBidSystemMessage({
+      bid,
+      task,
+      senderId: userId,
+      receiverId,
+      message: `New price offer: ₹${amount}`,
+      systemMessageType: 'counter_offer'
+    });
+
+    res.status(201).json({ message: 'Counter-offer sent', bid });
+  } catch (error) {
+    console.error('Error creating counter-offer:', error);
+    res.status(500).json({ message: 'Failed to create counter-offer' });
+  }
+};
+
+// Accept the other party's active counter-offer and make it the bid amount.
+exports.acceptCounterOffer = async (req, res) => {
+  try {
+    const { bidId, offerId } = req.params;
+    const userId = req.user._id;
+    const bid = await Bid.findById(bidId).populate('taskId');
+    if (!bid) return res.status(404).json({ message: 'Bid not found' });
+
+    const task = bid.taskId;
+    const isOwner = task.clientId.toString() === userId.toString();
+    const isBidder = bid.bidderId.toString() === userId.toString();
+    if (!isOwner && !isBidder) {
+      return res.status(403).json({ message: 'Only the task owner and bidder can accept this offer' });
+    }
+    if (task.status !== 'open' || bid.status !== 'pending') {
+      return res.status(400).json({ message: 'This bid can no longer be negotiated' });
+    }
+
+    const offer = bid.counterOffers.id(offerId);
+    if (!offer || offer.status !== 'pending') {
+      return res.status(404).json({ message: 'Pending offer not found' });
+    }
+    if (offer.proposedBy.toString() === userId.toString()) {
+      return res.status(400).json({ message: 'You cannot accept your own offer' });
+    }
+
+    offer.status = 'accepted';
+    offer.respondedAt = new Date();
+    bid.amount = offer.amount;
+    bid.agreedAmount = offer.amount;
+    bid.negotiationStatus = 'agreed';
+    await bid.save();
+
+    const receiverId = isOwner ? bid.bidderId : task.clientId;
+    await addBidSystemMessage({
+      bid,
+      task,
+      senderId: userId,
+      receiverId,
+      message: `Price agreed at ₹${offer.amount}`,
+      systemMessageType: 'offer_accepted'
+    });
+
+    res.json({ message: `Offer accepted at ₹${offer.amount}`, bid });
+  } catch (error) {
+    console.error('Error accepting counter-offer:', error);
+    res.status(500).json({ message: 'Failed to accept counter-offer' });
   }
 };
 

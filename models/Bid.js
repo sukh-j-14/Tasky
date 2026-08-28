@@ -45,6 +45,25 @@ const bidSchema = new mongoose.Schema({
     message: String,
     createdAt: { type: Date, default: Date.now }
   }],
+
+  // Price negotiation history. Only one offer may be pending at a time.
+  counterOffers: [{
+    amount: { type: Number, required: true, min: 1 },
+    proposedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'countered'],
+      default: 'pending'
+    },
+    createdAt: { type: Date, default: Date.now },
+    respondedAt: Date
+  }],
+  negotiationStatus: {
+    type: String,
+    enum: ['none', 'negotiating', 'agreed'],
+    default: 'none'
+  },
+  agreedAmount: { type: Number, min: 1 },
   
   // Timeline tracking
   milestones: [{
@@ -103,5 +122,4 @@ bidSchema.set('toObject', { virtuals: true });
 const Bid = mongoose.model('Bid', bidSchema);
 
 module.exports = Bid;
-
 

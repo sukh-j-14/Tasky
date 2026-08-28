@@ -349,13 +349,23 @@
                 const actionsDiv = clone.querySelector('#bidActions');
                 if (currentUser && currentTask.clientId._id === currentUser._id && currentTask.status === 'open') {
                     if (bid.status === 'pending') {
+                        const offers = bid.counterOffers || [];
+                        const latestOffer = offers[offers.length - 1];
+                        const hasPendingOffer = latestOffer?.status === 'pending';
+                        const offerFromOwner = hasPendingOffer && (latestOffer.proposedBy?._id || latestOffer.proposedBy) === currentUser._id;
+                        const negotiationControls = hasPendingOffer
+                            ? offerFromOwner
+                                ? `<span class="text-sm text-amber-700">Your offer: ₹${latestOffer.amount} — awaiting bidder</span>`
+                                : `<span class="text-sm text-amber-700">Bidder offers ₹${latestOffer.amount}</span>
+                                   <button onclick="acceptCounterOffer('${bid._id}', '${latestOffer._id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Accept ₹${latestOffer.amount}</button>
+                                   <button onclick="counterOffer('${bid._id}', ${latestOffer.amount})" class="bg-amber-600 text-white px-3 py-1 rounded text-sm hover:bg-amber-700">Counter</button>`
+                            : `<button onclick="counterOffer('${bid._id}', ${bid.amount})" class="bg-amber-600 text-white px-3 py-1 rounded text-sm hover:bg-amber-700">Bargain</button>`;
                         actionsDiv.innerHTML = `
                             <button onclick="contactBidder('${bid._id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 mr-2">
                                 Contact
                             </button>
-                            <button onclick="acceptBid('${bid._id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
-                                Accept
-                            </button>
+                            ${negotiationControls}
+                            ${hasPendingOffer ? '' : `<button onclick="acceptBid('${bid._id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Accept Bid${bid.negotiationStatus === 'agreed' ? ` at ₹${bid.amount}` : ''}</button>`}
                             <button onclick="rejectBid('${bid._id}')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">
                                 Reject
                             </button>
@@ -470,6 +480,49 @@
             } catch (error) {
                 console.error('Error rejecting bid:', error);
                 alert('Error rejecting bid. Please try again.');
+            }
+        }
+
+        async function counterOffer(bidId, currentAmount) {
+            const value = prompt(`Enter your counter-offer amount (current: ₹${currentAmount})`);
+            if (value === null) return;
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                alert('Enter a valid positive amount.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/bids/${bidId}/counter-offers`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to send offer');
+                alert('Counter-offer sent.');
+                loadTaskBids();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        async function acceptCounterOffer(bidId, offerId) {
+            if (!confirm('Accept this price offer? You can still review and accept the bid afterward.')) return;
+            try {
+                const response = await fetch(`/api/bids/${bidId}/counter-offers/${offerId}/accept`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to accept offer');
+                alert(result.message);
+                loadTaskBids();
+            } catch (error) {
+                alert(error.message);
             }
         }
 

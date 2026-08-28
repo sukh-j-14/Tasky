@@ -56,7 +56,7 @@ const messageSchema = new mongoose.Schema({
   },
   systemMessageType: { 
     type: String, 
-    enum: ['bid_accepted', 'bid_rejected', 'payment_received', 'task_completed', 'milestone_achieved', 'dispute_opened', 'dispute_resolved']
+    enum: ['bid_accepted', 'bid_rejected', 'counter_offer', 'offer_accepted', 'payment_received', 'task_completed', 'milestone_achieved', 'dispute_opened', 'dispute_resolved']
   },
   
   // Message Actions
@@ -206,5 +206,4 @@ conversationSchema.index({ lastMessageAt: -1 });
 const Conversation = mongoose.model('Conversation', conversationSchema);
 
 module.exports = { Message, Conversation };
-
 

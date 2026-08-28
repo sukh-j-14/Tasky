@@ -762,18 +762,51 @@
             clone
               .querySelector(".view-task-btn")
               .addEventListener("click", () => viewTask(bid.taskId?._id));
-            clone
-              .querySelector(".withdraw-bid-btn")
-              .addEventListener("click", () => withdrawBid(bid._id));
+            const withdrawButton = clone.querySelector('.withdraw-bid-btn');
+            if (bid.status === 'pending') {
+              withdrawButton.addEventListener('click', () => withdrawBid(bid._id));
+            } else {
+              withdrawButton.classList.add('hidden');
+            }
+
+            const bidActions = clone.querySelector('.flex.space-x-2');
+            const offers = bid.counterOffers || [];
+            const latestOffer = offers[offers.length - 1];
+            if (bid.status === 'pending' && latestOffer?.status === 'pending') {
+              const bidderId = bid.bidderId?._id || bid.bidderId;
+              const offeredByBidder = (latestOffer.proposedBy?._id || latestOffer.proposedBy) === bidderId;
+              if (offeredByBidder) {
+                const waiting = document.createElement('span');
+                waiting.className = 'text-sm text-amber-700 self-center';
+                waiting.textContent = `Your offer ₹${latestOffer.amount} is awaiting the owner`;
+                bidActions.appendChild(waiting);
+              } else {
+                const acceptOfferBtn = document.createElement('button');
+                acceptOfferBtn.className = 'inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700';
+                acceptOfferBtn.textContent = `Accept ₹${latestOffer.amount}`;
+                acceptOfferBtn.addEventListener('click', () => acceptCounterOffer(bid._id, latestOffer._id));
+                bidActions.appendChild(acceptOfferBtn);
+
+                const counterBtn = document.createElement('button');
+                counterBtn.className = 'inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-amber-600 hover:bg-amber-700';
+                counterBtn.textContent = 'Counter';
+                counterBtn.addEventListener('click', () => counterOffer(bid._id, latestOffer.amount));
+                bidActions.appendChild(counterBtn);
+              }
+            } else if (bid.negotiationStatus === 'agreed') {
+              const agreed = document.createElement('span');
+              agreed.className = 'text-sm font-medium text-green-700 self-center';
+              agreed.textContent = `Agreed price: ₹${bid.amount}`;
+              bidActions.appendChild(agreed);
+            }
 
             // Messaging becomes available after the task owner accepts the bid.
             if (bid.status === 'accepted') {
-              const actionsDiv = clone.querySelector('.flex.space-x-2');
               const contactBtn = document.createElement('button');
               contactBtn.className = 'inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none';
               contactBtn.innerHTML = '<i class="fas fa-comments mr-1"></i>Contact';
               contactBtn.addEventListener('click', () => contactClient(bid));
-              actionsDiv.appendChild(contactBtn);
+              bidActions.appendChild(contactBtn);
             }
 
             bidsList.appendChild(clone);
@@ -818,6 +851,48 @@
             console.error("Error withdrawing bid:", error);
             alert("Failed to withdraw bid. Please try again.");
           }
+        }
+      }
+
+      async function counterOffer(bidId, currentAmount) {
+        const value = prompt(`Enter your counter-offer amount (current offer: ₹${currentAmount})`);
+        if (value === null) return;
+        const amount = Number(value);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          alert('Enter a valid positive amount.');
+          return;
+        }
+        try {
+          const response = await fetch(`/api/bids/${bidId}/counter-offers`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${getToken()}`,
+            },
+            body: JSON.stringify({ amount }),
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || 'Failed to send offer');
+          alert('Counter-offer sent.');
+          loadBids();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      async function acceptCounterOffer(bidId, offerId) {
+        if (!confirm('Accept this price offer?')) return;
+        try {
+          const response = await fetch(`/api/bids/${bidId}/counter-offers/${offerId}/accept`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${getToken()}` },
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || 'Failed to accept offer');
+          alert(result.message);
+          loadBids();
+        } catch (error) {
+          alert(error.message);
         }
       }
 

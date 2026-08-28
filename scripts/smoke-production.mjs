@@ -102,11 +102,59 @@ await request(`/api/bids/${bidResult.bid._id}`, {
 const bids = await request(`/api/bids/task/${task._id}`, { token: owner.token });
 assert.equal(bids.bids.length, 1);
 
+const ownerOfferResult = await request(`/api/bids/${bidResult.bid._id}/counter-offers`, {
+  token: owner.token,
+  method: 'POST',
+  expected: 201,
+  body: { amount: 80 }
+});
+const ownerOffer = ownerOfferResult.bid.counterOffers.at(-1);
+assert.equal(ownerOffer.amount, 80, 'Owner counter-offer was not recorded');
+await request(`/api/bids/${bidResult.bid._id}/counter-offers`, {
+  token: owner.token,
+  method: 'POST',
+  expected: 400,
+  body: { amount: 75 }
+});
+await request(`/api/bids/${bidResult.bid._id}/counter-offers`, {
+  token: outsider.token,
+  method: 'POST',
+  expected: 403,
+  body: { amount: 70 }
+});
+await request(`/api/bids/${bidResult.bid._id}/accept`, {
+  token: owner.token,
+  method: 'POST',
+  expected: 400,
+  body: { platformFee: 1, totalAmount: 91 }
+});
+
+const bidderCounterResult = await request(`/api/bids/${bidResult.bid._id}/counter-offers`, {
+  token: freelancer.token,
+  method: 'POST',
+  expected: 201,
+  body: { amount: 85 }
+});
+const bidderOffer = bidderCounterResult.bid.counterOffers.at(-1);
+assert.equal(bidderOffer.amount, 85, 'Bidder counter-offer was not recorded');
+await request(`/api/bids/${bidResult.bid._id}/counter-offers/${bidderOffer._id}/accept`, {
+  token: freelancer.token,
+  method: 'POST',
+  expected: 400
+});
+const agreement = await request(`/api/bids/${bidResult.bid._id}/counter-offers/${bidderOffer._id}/accept`, {
+  token: owner.token,
+  method: 'POST'
+});
+assert.equal(agreement.bid.amount, 85, 'Agreed offer did not become the bid amount');
+assert.equal(agreement.bid.negotiationStatus, 'agreed', 'Negotiation was not marked agreed');
+
 const acceptance = await request(`/api/bids/${bidResult.bid._id}/accept`, {
   token: owner.token,
   method: 'POST',
-  body: { platformFee: 1, totalAmount: 91 }
+  body: { platformFee: 1, totalAmount: 86 }
 });
+assert.equal(acceptance.bid.amount, 85, 'Final accepted bid did not use the bargained amount');
 
 const conversations = await request('/api/messages/conversations', { token: owner.token });
 const conversation = conversations.conversations.find(item => item.taskId?._id === task._id || item.taskId === task._id);
@@ -131,6 +179,8 @@ await request(`/api/messages/messages/${sentMessage.newMessage._id}`, {
 
 const freelancerMessages = await request(`/api/messages/conversations/${conversation._id}/messages`, { token: freelancer.token });
 assert.ok(freelancerMessages.messages.some(item => item.message === 'Production smoke-test message'), 'Freelancer could not receive the message');
+assert.ok(freelancerMessages.messages.some(item => item.systemMessageType === 'counter_offer'), 'Counter-offer was not recorded in chat');
+assert.ok(freelancerMessages.messages.some(item => item.systemMessageType === 'offer_accepted'), 'Offer agreement was not recorded in chat');
 
 await request(`/api/tasks/${task._id}/complete`, { token: freelancer.token, method: 'POST', expected: 403 });
 const completion = await request(`/api/tasks/${task._id}/complete`, { token: owner.token, method: 'POST' });
