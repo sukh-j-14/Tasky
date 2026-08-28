@@ -1,5 +1,7 @@
 const express = require('express');
 const Task = require('../models/Task');
+const Bid = require('../models/Bid');
+const { Message, Conversation } = require('../models/Message');
 const authMiddleware = require('../middlewars/auth.middleware')
 const jwt = require("jsonwebtoken")
 const router = express.Router();
@@ -226,6 +228,33 @@ router.post('/:id/complete', authMiddleware.authenticateUser, async (req, res) =
     task.status = 'completed';
     task.completedAt = new Date();
     await task.save();
+
+    const acceptedBid = await Bid.findOne({ taskId: task._id, status: 'accepted' });
+    if (acceptedBid) {
+      acceptedBid.completed = true;
+      acceptedBid.completedAt = task.completedAt;
+      await acceptedBid.save();
+
+      const conversation = await Conversation.findOne({
+        taskId: task._id,
+        bidId: acceptedBid._id
+      });
+
+      if (conversation) {
+        const completionMessage = await Message.create({
+          conversationId: conversation._id,
+          senderId: userId,
+          receiverId: acceptedBid.bidderId,
+          message: `The task "${task.title}" has been marked as completed.`,
+          messageType: 'system',
+          isSystemMessage: true,
+          systemMessageType: 'task_completed'
+        });
+        conversation.lastMessage = completionMessage._id;
+        conversation.lastMessageAt = completionMessage.createdAt;
+        await conversation.save();
+      }
+    }
 
     if (task.selectedFreelancerId) {
       await require('../models/User').findByIdAndUpdate(task.selectedFreelancerId, {

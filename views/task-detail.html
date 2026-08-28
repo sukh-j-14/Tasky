@@ -323,7 +323,8 @@
             if (!currentUser) return;
 
             // Check if current user is the task owner
-            const isTaskOwner = currentUser._id === currentTask.clientId._id;
+            const taskOwnerId = currentTask.clientId?._id || currentTask.clientId;
+            const isTaskOwner = currentUser._id === taskOwnerId;
 
             if (isTaskOwner) {
                 // Task owner actions
@@ -334,6 +335,15 @@
                         </button>
                         <button onclick="deleteTask()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                             Delete Task
+                        </button>
+                    `;
+                } else if (currentTask.status === 'in-progress') {
+                    actionsDiv.innerHTML = `
+                        <button onclick="viewBids()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700">
+                            View Bids
+                        </button>
+                        <button id="completeTaskButton" onclick="completeTask()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-check mr-1"></i>Mark Completed
                         </button>
                     `;
                 } else {
@@ -391,6 +401,33 @@
             window.location.href = `task-bids.html?id=${currentTask._id}`;
         }
 
+        async function completeTask() {
+            if (!confirm('Mark this task as completed? This action cannot be undone.')) return;
+
+            const button = document.getElementById('completeTaskButton');
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Completing...';
+            }
+
+            try {
+                const response = await fetch(`/api/tasks/${currentTask._id}/complete`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to complete task');
+
+                currentTask.status = result.task.status;
+                currentTask.completedAt = result.task.completedAt;
+                alert(result.message);
+                displayTaskDetails();
+            } catch (error) {
+                alert(error.message);
+                setupTaskActions();
+            }
+        }
+
         function logout() {
             localStorage.removeItem('token');
             window.location.href = 'login.html';
@@ -398,4 +435,3 @@
     </script>
 </body>
 </html>
-

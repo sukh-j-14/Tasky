@@ -87,7 +87,11 @@ await request(`/api/messages/conversations/${conversation._id}/messages`, {
 const freelancerMessages = await request(`/api/messages/conversations/${conversation._id}/messages`, { token: freelancer.token });
 assert.ok(freelancerMessages.messages.some(item => item.message === 'Production smoke-test message'), 'Freelancer could not receive the message');
 
-await request(`/api/tasks/${task._id}/complete`, { token: owner.token, method: 'POST' });
+const completion = await request(`/api/tasks/${task._id}/complete`, { token: owner.token, method: 'POST' });
+assert.equal(completion.task.status, 'completed', 'Task was not marked completed');
+
+const completedMessages = await request(`/api/messages/conversations/${conversation._id}/messages`, { token: freelancer.token });
+assert.ok(completedMessages.messages.some(item => item.systemMessageType === 'task_completed'), 'Freelancer did not receive task completion notice');
 await request('/api/payments/history', { token: owner.token, expected: 503 });
 
 console.log(JSON.stringify({
