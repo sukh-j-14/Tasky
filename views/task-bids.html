@@ -424,12 +424,17 @@
                     })
                 });
 
+                const result = await response.json();
+
                 if (response.ok) {
                     alert('Bid accepted successfully!');
-                    loadTaskBids(); // Reload to show updated status
+                    if (result.conversationId) {
+                        window.location.href = `chat.html?conversationId=${result.conversationId}`;
+                    } else {
+                        loadTaskBids();
+                    }
                 } else {
-                    const error = await response.json();
-                    alert('Failed to accept bid: ' + error.message);
+                    alert('Failed to accept bid: ' + result.message);
                 }
             } catch (error) {
                 console.error('Error accepting bid:', error);
@@ -497,4 +502,3 @@
     </script>
 </body>
 </html>
-

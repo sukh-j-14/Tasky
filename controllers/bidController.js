@@ -261,28 +261,42 @@ exports.acceptBid = async (req, res) => {
     );
 
     // Create system message
-    const conversation = await Conversation.findOne({ 
+    let conversation = await Conversation.findOne({
       taskId: task._id, 
       bidId: bidId 
     });
 
-    if (conversation) {
-      const systemMessage = new Message({
-        conversationId: conversation._id,
-        senderId: userId,
-        receiverId: bid.bidderId,
-        message: `Your bid has been accepted for the task "${task.title}"`,
-        messageType: 'system',
-        isSystemMessage: true,
-        systemMessageType: 'bid_accepted'
+    // Older bids may not have a conversation, so accepting a bid must guarantee one.
+    if (!conversation) {
+      conversation = new Conversation({
+        participants: [task.clientId, bid.bidderId],
+        taskId: task._id,
+        bidId: bid._id,
+        title: `Bid discussion for: ${task.title}`
       });
-      await systemMessage.save();
+      await conversation.save();
     }
+
+    const systemMessage = new Message({
+      conversationId: conversation._id,
+      senderId: userId,
+      receiverId: bid.bidderId,
+      message: `Your bid has been accepted for the task "${task.title}"`,
+      messageType: 'system',
+      isSystemMessage: true,
+      systemMessageType: 'bid_accepted'
+    });
+    await systemMessage.save();
+
+    conversation.lastMessage = systemMessage._id;
+    conversation.lastMessageAt = new Date();
+    await conversation.save();
 
     res.json({ 
       message: 'Bid accepted successfully',
       bid,
-      task
+      task,
+      conversationId: conversation._id
     });
 
   } catch (error) {
@@ -467,4 +481,3 @@ exports.getBidStats = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch bid statistics' });
   }
 };
-

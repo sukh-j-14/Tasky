@@ -203,11 +203,13 @@
         const participantId = urlParams.get('participantId');
         const conversationId = urlParams.get('conversationId');
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('Chat page loaded, URL params:', { taskId, participantId, bidId, conversationId });
-            loadUserProfile();
-            loadConversations();
             setupEventListeners();
+            const profileLoaded = await loadUserProfile();
+            if (profileLoaded) {
+                await loadConversations();
+            }
         });
 
         async function loadUserProfile() {
@@ -219,10 +221,13 @@
 
                 if (response.ok) {
                     currentUser = await response.json();
+                    return true;
                 }
             } catch (error) {
                 console.error('Error loading user profile:', error);
             }
+            window.location.href = 'login.html';
+            return false;
         }
 
         async function loadConversations() {
@@ -398,7 +403,8 @@
                 messageDiv.querySelector('.message-content').textContent = message.message;
                 messageDiv.querySelector('.message-time').textContent = formatTime(message.createdAt);
                 
-                if (message.senderId._id === currentUser._id) {
+                const senderId = message.senderId?._id || message.senderId;
+                if (senderId === currentUser._id) {
                     messageDiv.classList.add('sent');
                 } else {
                     messageDiv.classList.add('received');
@@ -546,4 +552,3 @@
     </script>
 </body>
 </html>
-

@@ -66,7 +66,7 @@ const bidResult = await request('/api/bids', {
 const bids = await request(`/api/bids/task/${task._id}`, { token: owner.token });
 assert.equal(bids.bids.length, 1);
 
-await request(`/api/bids/${bidResult.bid._id}/accept`, {
+const acceptance = await request(`/api/bids/${bidResult.bid._id}/accept`, {
   token: owner.token,
   method: 'POST',
   body: { platformFee: 1, totalAmount: 91 }
@@ -75,6 +75,7 @@ await request(`/api/bids/${bidResult.bid._id}/accept`, {
 const conversations = await request('/api/messages/conversations', { token: owner.token });
 const conversation = conversations.conversations.find(item => item.taskId?._id === task._id || item.taskId === task._id);
 assert.ok(conversation, 'Bid conversation was not created');
+assert.equal(acceptance.conversationId, conversation._id, 'Acceptance did not return its conversation');
 
 await request(`/api/messages/conversations/${conversation._id}/messages`, {
   token: owner.token,
@@ -82,6 +83,9 @@ await request(`/api/messages/conversations/${conversation._id}/messages`, {
   expected: 201,
   body: { message: 'Production smoke-test message' }
 });
+
+const freelancerMessages = await request(`/api/messages/conversations/${conversation._id}/messages`, { token: freelancer.token });
+assert.ok(freelancerMessages.messages.some(item => item.message === 'Production smoke-test message'), 'Freelancer could not receive the message');
 
 await request(`/api/tasks/${task._id}/complete`, { token: owner.token, method: 'POST' });
 await request('/api/payments/history', { token: owner.token, expected: 503 });

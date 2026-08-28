@@ -128,9 +128,11 @@
         let currentUser = null;
         let conversations = [];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUserProfile();
-            loadConversations();
+        document.addEventListener('DOMContentLoaded', async function() {
+            const profileLoaded = await loadUserProfile();
+            if (profileLoaded) {
+                await loadConversations();
+            }
         });
 
         async function loadUserProfile() {
@@ -142,10 +144,13 @@
 
                 if (response.ok) {
                     currentUser = await response.json();
+                    return true;
                 }
             } catch (error) {
                 console.error('Error loading user profile:', error);
             }
+            window.location.href = 'login.html';
+            return false;
         }
 
         async function loadConversations() {
