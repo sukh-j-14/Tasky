@@ -320,20 +320,6 @@
               The premium platform for student academic collaboration and
               support.
             </p>
-            <div class="mt-6 flex space-x-6">
-              <a href="#" class="text-gray-400 hover:text-white">
-                <i class="fab fa-facebook-f"></i>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <i class="fab fa-twitter"></i>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <i class="fab fa-instagram"></i>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <i class="fab fa-linkedin-in"></i>
-              </a>
-            </div>
           </div>
           <div>
             <h3
@@ -343,23 +329,23 @@
             </h3>
             <ul class="mt-4 space-y-3">
               <li>
-                <a href="#" class="text-gray-300 hover:text-white"
-                  >Assignment Help</a
+                <a href="browsetask.html" class="text-gray-300 hover:text-white"
+                  >Browse Tasks</a
                 >
               </li>
               <li>
-                <a href="#" class="text-gray-300 hover:text-white"
-                  >Research Papers</a
+                <a href="posttask.html" class="text-gray-300 hover:text-white"
+                  >Post a Task</a
                 >
               </li>
               <li>
-                <a href="#" class="text-gray-300 hover:text-white"
-                  >Lab Reports</a
+                <a href="messages.html" class="text-gray-300 hover:text-white"
+                  >Messages</a
                 >
               </li>
               <li>
-                <a href="#" class="text-gray-300 hover:text-white"
-                  >Presentation Design</a
+                <a href="mytasks.html" class="text-gray-300 hover:text-white"
+                  >My Tasks</a
                 >
               </li>
             </ul>
@@ -372,18 +358,15 @@
             </h3>
             <ul class="mt-4 space-y-3">
               <li>
-                <a href="#" class="text-gray-300 hover:text-white">About Us</a>
+                <a href="about.html" class="text-gray-300 hover:text-white">About Us</a>
               </li>
               <li>
-                <a href="#" class="text-gray-300 hover:text-white">Careers</a>
-              </li>
-              <li>
-                <a href="#" class="text-gray-300 hover:text-white"
+                <a href="terms.html" class="text-gray-300 hover:text-white"
                   >Academic Integrity</a
                 >
               </li>
               <li>
-                <a href="#" class="text-gray-300 hover:text-white">Contact</a>
+                <a href="contact.html" class="text-gray-300 hover:text-white">Contact</a>
               </li>
             </ul>
           </div>
@@ -395,14 +378,11 @@
             &copy; 2025 Tasky. All rights reserved.
           </p>
           <div class="mt-4 md:mt-0 flex space-x-8">
-            <a href="#" class="text-gray-400 hover:text-white text-sm"
+            <a href="privacy.html" class="text-gray-400 hover:text-white text-sm"
               >Privacy Policy</a
             >
-            <a href="#" class="text-gray-400 hover:text-white text-sm"
+            <a href="terms.html" class="text-gray-400 hover:text-white text-sm"
               >Terms of Service</a
-            >
-            <a href="#" class="text-gray-400 hover:text-white text-sm"
-              >Cookie Policy</a
             >
           </div>
         </div>
@@ -518,7 +498,7 @@
               </p>
             </div>
           </div>
-          <div class="mt-6 flex justify-between items-center">
+            <div class="mt-6 flex justify-between items-center">
             <div class="flex space-x-2">
               <button
                 class="view-task-btn inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none"
@@ -786,8 +766,8 @@
               .querySelector(".withdraw-bid-btn")
               .addEventListener("click", () => withdrawBid(bid._id));
 
-            // Add contact button for accepted bids (temporarily show for all bids for testing)
-            if (bid.status === 'accepted' || true) { // Temporarily show for all bids
+            // Messaging becomes available after the task owner accepts the bid.
+            if (bid.status === 'accepted') {
               const actionsDiv = clone.querySelector('.flex.space-x-2');
               const contactBtn = document.createElement('button');
               contactBtn.className = 'inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none';
@@ -883,7 +863,7 @@
           console.log('Task ID:', bid.taskId._id); // Debug log
           console.log('Bid ID:', bid._id); // Debug log
           console.log('Client ID:', bid.taskId.clientId._id); // Debug log
-          window.open(chatUrl, '_blank');
+          window.location.href = chatUrl;
         } else {
           console.log('Task data:', bid.taskId); // Debug log
           console.log('Client ID missing:', bid.taskId?.clientId); // Debug log
@@ -924,6 +904,9 @@
       document.addEventListener("DOMContentLoaded", () => {
         loadTasks();
         loadBids();
+        if (new URLSearchParams(window.location.search).get('tab') === 'bids') {
+          bidsTab.click();
+        }
       });
     </script>
   </body>

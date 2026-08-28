@@ -50,13 +50,13 @@
             </div>
             <div class="bg-white p-8 rounded-lg shadow-lg w-full md:w-1/2">
                 <h2 class="text-2xl font-bold mb-4">Send us a Message</h2>
-                <form>
+                <form id="contactForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <input type="text" placeholder="Your Name" class="border border-gray-300 p-2 rounded">
-                        <input type="email" placeholder="Email Address" class="border border-gray-300 p-2 rounded">
+                        <input id="contactName" type="text" placeholder="Your Name" class="border border-gray-300 p-2 rounded" required>
+                        <input id="contactEmail" type="email" placeholder="Email Address" class="border border-gray-300 p-2 rounded" required>
                     </div>
-                    <input type="text" placeholder="Subject" class="border border-gray-300 p-2 rounded w-full mb-4">
-                    <textarea placeholder="Message" class="border border-gray-300 p-2 rounded w-full mb-4"></textarea>
+                    <input id="contactSubject" type="text" placeholder="Subject" class="border border-gray-300 p-2 rounded w-full mb-4" required>
+                    <textarea id="contactMessage" placeholder="Message" class="border border-gray-300 p-2 rounded w-full mb-4" required></textarea>
                     <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded shadow hover:bg-purple-600">Send Message <i class="fas fa-paper-plane ml-2"></i></button>
                 </form>
             </div>
@@ -94,5 +94,16 @@
         </div>
     </footer>
     <script src="shared/navigation.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const subject = encodeURIComponent(document.getElementById('contactSubject').value.trim());
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const message = document.getElementById('contactMessage').value.trim();
+            const body = encodeURIComponent(`${message}\n\nFrom: ${name} (${email})`);
+            window.location.href = `mailto:ps9935542@gmail.com?subject=${subject}&body=${body}`;
+        });
+    </script>
 </body>
 </html>

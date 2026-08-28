@@ -351,6 +351,9 @@ exports.rejectBid = async (req, res) => {
         systemMessageType: 'bid_rejected'
       });
       await systemMessage.save();
+      conversation.lastMessage = systemMessage._id;
+      conversation.lastMessageAt = systemMessage.createdAt;
+      await conversation.save();
     }
 
     res.json({ message: 'Bid rejected successfully' });

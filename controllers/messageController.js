@@ -15,6 +15,28 @@ exports.createOrGetConversation = async (req, res) => {
       return res.status(400).json({ message: 'Participant ID is required' });
     }
 
+    if (participantId.toString() === userId.toString()) {
+      return res.status(400).json({ message: 'You cannot start a conversation with yourself' });
+    }
+
+    const participant = await User.findById(participantId);
+    if (!participant) {
+      return res.status(404).json({ message: 'Participant not found' });
+    }
+
+    if (taskId || bidId) {
+      const bid = bidId ? await Bid.findById(bidId) : null;
+      const task = await Task.findById(taskId || bid?.taskId);
+      if (!task || (bidId && (!bid || bid.taskId.toString() !== task._id.toString()))) {
+        return res.status(400).json({ message: 'Invalid task or bid conversation' });
+      }
+
+      const allowedParticipants = [task.clientId.toString(), bid?.bidderId?.toString()].filter(Boolean);
+      if (!allowedParticipants.includes(userId.toString()) || !allowedParticipants.includes(participantId.toString())) {
+        return res.status(403).json({ message: 'You are not part of this task conversation' });
+      }
+    }
+
     // Check if conversation already exists
     let conversation = await Conversation.findOne({
       participants: { $all: [userId, participantId] },
@@ -327,6 +349,14 @@ exports.markAsRead = async (req, res) => {
     const { conversationId } = req.params;
     const userId = req.user._id;
 
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ message: 'Conversation not found' });
+    }
+    if (!conversation.participants.some(id => id.toString() === userId.toString())) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     await Message.updateMany(
       {
         conversationId,
@@ -534,4 +564,3 @@ exports.sendUpdateRequest = async (req, res) => {
     res.status(500).json({ message: 'Failed to send update request' });
   }
 };
-
