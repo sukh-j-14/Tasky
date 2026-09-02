@@ -338,6 +338,12 @@
                             <span>${task.currentBidCount || 0} bids</span>
                             <span>${task.views || 0} views</span>
                         </div>
+                        ${task.attachments && task.attachments.length ? `
+                            <div class="flex items-center text-sm text-blue-600 mb-4">
+                                <i class="fas fa-paperclip mr-2"></i>
+                                ${task.attachments.length} supporting document${task.attachments.length === 1 ? '' : 's'} — open View Details to download
+                            </div>
+                        ` : ''}
                         
                         <div class="flex space-x-2">
                             <button onclick="viewTask('${task._id}')" class="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors">

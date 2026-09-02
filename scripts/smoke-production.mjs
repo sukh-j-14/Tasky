@@ -60,6 +60,22 @@ const updatedProfile = await request('/api/auth/profile', {
 });
 assert.equal(updatedProfile.user.bio, 'Production verification profile', 'Profile update was not persisted');
 
+const attachmentContents = `%PDF-1.4\n% Tasky production attachment ${runId}\n%%EOF`;
+const attachmentForm = new FormData();
+attachmentForm.append(
+  'taskFile',
+  new Blob([attachmentContents], { type: 'application/pdf' }),
+  `${runId}.pdf`
+);
+const attachmentResponse = await fetch(`${baseUrl}/api/tasks/attachments`, {
+  method: 'POST',
+  headers: { authorization: `Bearer ${owner.token}` },
+  body: attachmentForm
+});
+const attachmentPayload = await attachmentResponse.json().catch(() => ({}));
+assert.equal(attachmentResponse.status, 201, `Attachment upload failed: ${attachmentResponse.status} ${JSON.stringify(attachmentPayload)}`);
+assert.equal(attachmentPayload.attachment.originalName, `${runId}.pdf`);
+
 const task = await request('/api/tasks', {
   token: owner.token,
   method: 'POST',
@@ -67,9 +83,14 @@ const task = await request('/api/tasks', {
   body: {
     title: `${runId} production task`, description: 'Disposable production smoke test task.',
     category: 'coding', budget: 0, contactMethod: 'email', isPublic: true,
-    deadline: new Date(Date.now() + 7 * 86400000).toISOString()
+    deadline: new Date(Date.now() + 7 * 86400000).toISOString(),
+    attachments: [attachmentPayload.attachment]
   }
 });
+assert.equal(task.attachments.length, 1, 'The uploaded document was not linked to the task');
+assert.equal(task.attachments[0].originalName, `${runId}.pdf`);
+
+await request(task.attachments[0].url, { expected: 401 });
 
 await request('/api/bids', {
   token: owner.token,
@@ -84,6 +105,12 @@ const bidResult = await request('/api/bids', {
   expected: 201,
   body: { taskId: task._id, amount: 90, message: 'Smoke-test bid', proposedTimeline: 3 }
 });
+
+const bidderDownload = await fetch(`${baseUrl}${task.attachments[0].url}`, {
+  headers: { authorization: `Bearer ${freelancer.token}` }
+});
+assert.equal(bidderDownload.status, 200, `Bidder could not download task document: ${bidderDownload.status}`);
+assert.equal(await bidderDownload.text(), attachmentContents, 'Downloaded task document contents changed');
 
 await request('/api/bids', {
   token: freelancer.token,

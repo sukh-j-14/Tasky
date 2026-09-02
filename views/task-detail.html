@@ -303,18 +303,54 @@
             // Attachments
             if (currentTask.attachments && currentTask.attachments.length > 0) {
                 const attachmentsDiv = document.getElementById('taskAttachments');
-                attachmentsDiv.innerHTML = currentTask.attachments.map(attachment => 
-                    `<a href="${attachment.url}" target="_blank" class="flex items-center text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-file mr-2"></i>
-                        ${attachment.name}
-                    </a>`
-                ).join('');
+                attachmentsDiv.innerHTML = '';
+                currentTask.attachments.forEach(attachment => {
+                    const downloadButton = document.createElement('button');
+                    downloadButton.type = 'button';
+                    downloadButton.className = 'flex items-center text-left text-blue-600 hover:text-blue-800';
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file-download mr-2';
+                    const label = document.createElement('span');
+                    label.textContent = attachment.originalName || 'Task document';
+                    downloadButton.append(icon, label);
+                    downloadButton.addEventListener('click', () => downloadAttachment(attachment));
+                    attachmentsDiv.appendChild(downloadButton);
+                });
             } else {
                 document.getElementById('attachmentsSection').classList.add('hidden');
             }
 
             // Actions based on user role and task status
             setupTaskActions();
+        }
+
+        async function downloadAttachment(attachment) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Please log in to download task documents.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(attachment.url, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    const result = await response.json().catch(() => ({}));
+                    throw new Error(result.message || 'Could not download the document');
+                }
+                const blobUrl = URL.createObjectURL(await response.blob());
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = attachment.originalName || 'task-document';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(blobUrl);
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
         function setupTaskActions() {
