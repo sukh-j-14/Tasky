@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Debug Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        #dropdownMenu {
+            z-index: 1000;
+        }
+        
+        #profileDropdown {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        #profileDropdown:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <h1 class="text-2xl font-bold mb-8">Dropdown Debug Test</h1>
+    
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Test 1: Dashboard-style dropdown (simplified)</h2>
+        <div class="relative inline-block">
+            <button id="profileDropdown" class="flex text-sm rounded-full focus:outline-none ring-2 ring-purple-500 ring-offset-2">
+                <img id="profileImage" class="h-9 w-9 rounded-full" src="https://via.placeholder.com/40" alt="Profile">
+            </button>
+            <div id="dropdownMenu" class="hidden origin-top-right absolute right-0 mt-3 w-56 rounded-xl shadow-lg py-2 bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100">
+                <div class="px-4 py-3">
+                    <p id="profileName" class="text-sm font-medium text-gray-900">Abhishek Dubey</p>
+                    <p id="profileMajor" class="text-sm text-gray-500 truncate">Student</p>
+                </div>
+                <div class="py-1">
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                    </a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-user mr-2"></i>Profile
+                    </a>
+                </div>
+                <div class="py-1">
+                    <a href="#" id="logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-8">
+        <h2 class="text-lg font-semibold mb-4">Test 2: Other pages style dropdown (with text)</h2>
+        <div class="relative inline-block">
+            <button id="profileDropdown2" class="flex items-center space-x-2 focus:outline-none bg-white p-2 rounded-lg shadow">
+                <img id="profileImage2" src="https://via.placeholder.com/40" alt="Profile" class="w-8 h-8 rounded-full">
+                <span id="profileName2" class="text-gray-700">Abhishek Dubey</span>
+                <i class="fas fa-chevron-down text-gray-400"></i>
+            </button>
+            <div id="dropdownMenu2" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-purple-100">
+                    <i class="fas fa-user mr-2"></i>Profile
+                </a>
+                <hr class="my-2">
+                <a href="#" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="debugInfo" class="mt-8 p-4 bg-gray-100 rounded-lg">
+        <h3 class="font-semibold mb-2">Debug Information:</h3>
+        <div id="debugContent"></div>
+    </div>
+
+    <script src="shared/navigation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug page loaded');
+            
+            // Test both dropdowns manually
+            const dropdown1 = document.getElementById('profileDropdown');
+            const menu1 = document.getElementById('dropdownMenu');
+            const dropdown2 = document.getElementById('profileDropdown2');
+            const menu2 = document.getElementById('dropdownMenu2');
+            
+            // Manual setup for dropdown 2 (other pages style)
+            if (dropdown2 && menu2) {
+                dropdown2.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Dropdown 2 clicked');
+                    menu2.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!dropdown2.contains(e.target) && !menu2.contains(e.target)) {
+                        menu2.classList.add('hidden');
+                    }
+                });
+
+                menu2.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+            
+            // Debug info
+            setTimeout(() => {
+                const debugContent = document.getElementById('debugContent');
+                debugContent.innerHTML = `
+                    <p><strong>Navigation.js loaded:</strong> ${typeof window.navigation !== 'undefined' ? 'Yes' : 'No'}</p>
+                    <p><strong>Dropdown 1 elements:</strong> ${!!dropdown1 && !!menu1 ? 'Found' : 'Missing'}</p>
+                    <p><strong>Dropdown 2 elements:</strong> ${!!dropdown2 && !!menu2 ? 'Found' : 'Missing'}</p>
+                    <p><strong>Current user:</strong> ${window.navigation?.currentUser ? 'Loaded' : 'Not loaded'}</p>
+                `;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "tasky-v2",
+  "version": "2.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "build": "npm run build -w frontend",
+    "start": "npm start -w backend",
+    "check": "node --check backend/app.js && node --check backend/server.js && npm run build",
+    "test": "node --test backend/tests/*.cjs",
+    "db:prepare": "node backend/scripts/prepare-db.cjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "mongodb-memory-server": "^11.3.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
