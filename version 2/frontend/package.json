@@ -12,7 +12,8 @@
     "ably": "^2.30.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0"
+    "react-router-dom": "^7.0.0",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "vite": "^6.0.0"

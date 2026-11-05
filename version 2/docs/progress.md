@@ -4,7 +4,7 @@
 
 - React JS frontend and Node.js / Express backend in separate frontend and backend folders under version 2.
 - Independent version 1 archive. Main branch and the existing production domain remain unchanged.
-- Upwork-inspired UI developed from a Google Stitch design: responsive homepage, category discovery, task search, loading/empty/error states and keyboard focus treatment.
+- Final Hamol-inspired UI developed with a new Google Stitch screen: scroll-driven Three.js orbital homepage, changing scene copy, responsive category discovery, original artwork, task search and saved dark/light themes. Prior Upwork/Carnilove directions are superseded.
 - Email/password signup/login, cookie sessions, protected pages and logout. Profile editing and persistent profile photos in MongoDB GridFS.
 - Task posting, details, search, pagination and editing. Supporting-document upload/download with a 3 MB limit and signed-in download authorization.
 - Proposals: submit, review, accept, decline, withdraw, counter-offer and agree on price. Transactional create/accept writes and duplicate-bid protection.
@@ -48,3 +48,7 @@ npm run check passes. npm test passes both integration tests: full account/task/
 https://tasky-v2-testing-60s38wcw3-sukhpreet-singhs-projects-46c3ca60.vercel.app
 
 Vercel deployment protection remains enabled; the account owner may need to sign in to Vercel. Synthetic preview accounts and one clearly labelled test task were created in the development database for Chrome verification. No real customer or production data was used.
+
+## Final UI update — 5 November
+
+Full Hamol homepage inspected in Chrome, including scroll scenes and all lower sections. Implemented original Tasky orbital artwork, pinned native-scroll narrative, chapter buttons, drag rotation, pause/reduced-motion/WebGL fallback, dark/light themes, responsive editorial sections and shared application typography. Chrome checked desktop and 390×844 mobile, theme persistence and scene changes. Production build and integration tests passed. See design.md for Stitch provenance and limits.

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>tasky. — Planetary Talent Grid for Elite Craft</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#456958",
+            "inverse-surface": "#e2e2e5",
+            "on-background": "#e2e2e5",
+            "on-error": "#690005",
+            "primary": "#ecfff3",
+            "inverse-on-surface": "#2f3133",
+            "secondary-container": "#283aa6",
+            "on-secondary-fixed-variant": "#283aa6",
+            "background": "#121416",
+            "primary-container": "#bfe7d2",
+            "outline": "#8b928d",
+            "on-error-container": "#ffdad6",
+            "primary-fixed": "#c3ecd6",
+            "on-secondary-fixed": "#000e5e",
+            "on-secondary-container": "#a5b0ff",
+            "on-primary-fixed-variant": "#2a4e3e",
+            "secondary": "#bbc3ff",
+            "error": "#ffb4ab",
+            "on-tertiary-container": "#60625d",
+            "on-tertiary-fixed-variant": "#464743",
+            "on-primary": "#123729",
+            "on-tertiary-fixed": "#1a1c19",
+            "surface-container-high": "#282a2c",
+            "on-surface": "#e2e2e5",
+            "surface": "#121416",
+            "surface-variant": "#333537",
+            "secondary-fixed-dim": "#bbc3ff",
+            "on-surface-variant": "#c1c8c2",
+            "outline-variant": "#414844",
+            "on-primary-fixed": "#002115",
+            "surface-container-low": "#1a1c1e",
+            "error-container": "#93000a",
+            "inverse-primary": "#426655",
+            "primary-fixed-dim": "#a8cfbb",
+            "tertiary-fixed": "#e3e3dd",
+            "surface-container": "#1e2022",
+            "on-secondary": "#051e90",
+            "tertiary-fixed-dim": "#c6c7c1",
+            "secondary-fixed": "#dee0ff",
+            "surface-container-lowest": "#0c0e10",
+            "tertiary": "#fbfbf4",
+            "surface-bright": "#38393c",
+            "on-tertiary": "#2f312d",
+            "surface-tint": "#a8cfbb",
+            "surface-dim": "#121416",
+            "surface-container-highest": "#333537",
+            "tertiary-container": "#deded8"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "4rem",
+            "space-xl": "4rem",
+            "margin-mobile": "1.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "2rem",
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "gutter-mobile": "1rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "label-caps": ["Manrope"],
+            "body-md": ["Manrope"],
+            "headline-xl-mobile": ["Manrope"],
+            "label-pill": ["Manrope"],
+            "headline-md": ["Manrope"],
+            "headline-xl": ["Manrope"],
+            "headline-lg": ["Manrope"],
+            "body-lg": ["Manrope"],
+            "display-hero-mobile": ["Manrope"],
+            "mono-meta": ["Manrope"],
+            "display-hero": ["Manrope"],
+            "headline-lg-mobile": ["Manrope"]
+          },
+          "fontSize": {
+            "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "body-md": ["15px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-xl-mobile": ["34px", { "lineHeight": "40px", "letterSpacing": "-0.03em", "fontWeight": "400" }],
+            "label-pill": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
+            "headline-xl": ["64px", { "lineHeight": "70px", "letterSpacing": "-0.04em", "fontWeight": "300" }],
+            "headline-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "400" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "300" }],
+            "display-hero-mobile": ["42px", { "lineHeight": "48px", "letterSpacing": "-0.035em", "fontWeight": "300" }],
+            "mono-meta": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "display-hero": ["84px", { "lineHeight": "90px", "letterSpacing": "-0.045em", "fontWeight": "300" }],
+            "headline-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.025em", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #0c0e10;
+      color: #e2e2e5;
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+      selection-background-color: #bfe7d2;
+      selection-color: #0c0e10;
+    }
+    ::selection {
+      background: #bfe7d2;
+      color: #0c0e10;
+    }
+    .celestial-star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 9999px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    .celestial-orbit {
+      border: 1px dashed rgba(233, 233, 227, 0.12);
+      border-radius: 50%;
+      position: absolute;
+      transform: rotateX(68deg) rotateY(-18deg);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface antialiased">
+<!-- 1. TOP NAVBAR (Shared Component Mapping) -->
+<header class="fixed top-0 left-0 right-0 z-50 w-full border-b border-outline-variant/30 bg-surface-container-lowest/70 backdrop-blur-md">
+<div class="flex items-center justify-between px-margin py-space-md w-full max-w-7xl mx-auto">
+<!-- Logo Wordmark -->
+<a class="flex items-center gap-1.5 font-headline-md text-headline-md text-primary tracking-tighter transition-all duration-200 active:scale-95" href="#">
+<span>tasky.</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container inline-block shadow-[0_0_8px_#bfe7d2]"></span>
+</a>
+<!-- Center Floating Pill Links -->
+<nav class="hidden md:flex items-center gap-8 px-6 py-2 rounded-full border border-outline-variant/30 bg-surface-container/60 backdrop-blur-md">
+<a class="text-primary font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#explore">
+          Explore
+        </a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#how-it-works">
+          How it works
+        </a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#messages">
+          Messages
+        </a>
+</nav>
+<!-- Right Action Button -->
+<div class="flex items-center gap-4">
+<button class="transition-all duration-200 active:scale-95 px-5 py-2 rounded-full bg-primary-container text-on-primary font-body-md text-body-md hover:shadow-[0_0_20px_rgba(191,231,210,0.3)] hover:scale-[1.02]">
+          Post a task
+        </button>
+</div>
+</div>
+</header>
+<!-- 2. HERO SECTION (Full Viewport, Deep Space & Stars) -->
+<section class="relative min-h-screen pt-32 pb-20 flex flex-col justify-between overflow-hidden bg-surface-container-lowest border-b border-outline-variant/20">
+<!-- Atmospheric Ambient Glows & Stars -->
+<div class="absolute inset-0 pointer-events-none overflow-hidden">
+<div class="absolute top-0 right-1/4 w-[700px] h-[700px] bg-secondary-container/10 rounded-full blur-[140px]"></div>
+<div class="absolute -bottom-48 left-1/3 w-[900px] h-[500px] bg-primary-container/5 rounded-full blur-[160px]"></div>
+<!-- Micro Stars -->
+<div class="celestial-star w-1 h-1 top-28 left-[12%] opacity-40"></div>
+<div class="celestial-star w-0.5 h-0.5 top-40 left-[35%] opacity-20"></div>
+<div class="celestial-star w-1 h-1 top-56 left-[78%] opacity-60"></div>
+<div class="celestial-star w-0.5 h-0.5 top-96 left-[62%] opacity-30"></div>
+<div class="celestial-star w-1.5 h-1.5 top-80 left-[18%] opacity-50 shadow-[0_0_6px_#fff]"></div>
+<div class="celestial-star w-0.5 h-0.5 top-32 left-[88%] opacity-40"></div>
+<div class="celestial-star w-1 h-1 bottom-44 left-[42%] opacity-25"></div>
+<div class="celestial-star w-0.5 h-0.5 bottom-64 left-[82%] opacity-35"></div>
+</div>
+<!-- Main Content Container (12-Col Grid) -->
+<div class="relative z-10 w-full max-w-7xl mx-auto px-margin my-auto grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
+<!-- Left Column (7 Columns) -->
+<div class="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-8">
+<!-- Category Tag Node -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container-low/70 mb-8 backdrop-blur-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container shadow-[0_0_8px_#bfe7d2]"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">01 / Planetary Talent Grid</span>
+</div>
+<!-- Giant Restrained Headline -->
+<h1 class="font-display-hero text-display-hero text-tertiary mb-6 tracking-tight leading-[1.05]">
+          Ideas need people.<br/>
+<span class="text-tertiary-fixed-dim font-light">Meet yours.</span>
+</h1>
+<!-- High-Craft Body Copy -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl mb-10 leading-relaxed font-light">
+          A sovereign marketplace connecting specialized visionaries in design, systems architecture, and technical writing with world-class independent creators.
+        </p>
+<!-- Minimal Interactive Search Capsule -->
+<div class="w-full max-w-xl p-1.5 rounded-full border border-outline-variant/40 bg-surface-container-low/80 backdrop-blur-xl flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)] focus-within:border-secondary transition-all">
+<div class="flex items-center gap-3 pl-4 flex-1">
+<span class="material-symbols-outlined text-outline text-lg">search</span>
+<input class="w-full bg-transparent border-0 text-on-surface placeholder:text-outline focus:ring-0 font-body-md text-body-md p-0" placeholder="Search specialized tasks or talent..." type="text"/>
+</div>
+<button class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary font-label-pill text-label-pill hover:bg-primary-fixed transition-all flex items-center gap-2">
+<span>Find Talent</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Right Column: 3D Spatial Scene (5 Columns) -->
+<div class="lg:col-span-5 relative flex items-center justify-center min-h-[460px] lg:min-h-[540px]">
+<!-- Large Orbital Sphere Assembly -->
+<div class="relative w-80 h-80 flex items-center justify-center">
+<!-- Outer Atmospheric Glow Field -->
+<div class="absolute inset-0 rounded-full bg-gradient-to-tr from-secondary-container/20 to-primary-container/20 blur-3xl scale-125"></div>
+<!-- Elliptical Orbit Rings -->
+<div class="celestial-orbit w-[390px] h-[390px] -top-10 -left-10 opacity-70"></div>
+<div class="celestial-orbit w-[480px] h-[480px] -top-20 -left-20 opacity-40"></div>
+<!-- Main Faceted Orbital Sphere (Pure CSS Rendered hamol.studio inspired element) -->
+<div class="relative w-64 h-64 rounded-full bg-gradient-to-b from-[#bfe7d2] via-[#243530] to-[#0c0e10] p-[1px] shadow-[0_0_60px_rgba(191,231,210,0.15)] flex items-center justify-center overflow-hidden">
+<!-- Internal Wireframe Latitudes -->
+<div class="absolute inset-0 opacity-25 bg-[radial-gradient(#bfe7d2_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<div class="w-full h-full rounded-full bg-surface-container-lowest/80 backdrop-blur-sm relative flex items-center justify-center">
+<!-- Internal Horizon Meridian Line -->
+<div class="w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-60"></div>
+<div class="h-full w-[1px] bg-gradient-to-b from-transparent via-secondary to-transparent opacity-40 absolute"></div>
+<!-- Inner Core Glow -->
+<div class="w-24 h-24 rounded-full bg-primary-container/20 blur-xl"></div>
+</div>
+</div>
+<!-- Orbiting Satellite Spheres -->
+<div class="absolute -top-4 right-2 w-10 h-10 rounded-full bg-gradient-to-tr from-secondary to-secondary-container shadow-[0_0_20px_rgba(187,195,255,0.4)] border border-white/20"></div>
+<div class="absolute bottom-8 -left-6 w-7 h-7 rounded-full bg-gradient-to-tr from-primary-container to-surface-variant shadow-[0_0_15px_rgba(191,231,210,0.3)] border border-primary-container/30"></div>
+<!-- Verified Contract Data Chip: Floating Card 1 -->
+<div class="absolute -top-8 -left-8 px-4 py-2.5 rounded-full border border-outline-variant/40 bg-surface-container-lowest/85 backdrop-blur-md shadow-2xl flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<div class="flex flex-col">
+<span class="font-mono-meta text-mono-meta text-primary text-[11px]">Spec // Core Engine V2</span>
+<span class="font-label-caps text-[9px] text-outline tracking-wider">MILESTONE CUSTODY ACTIVE</span>
+</div>
+</div>
+<!-- Verified Contract Data Chip: Floating Card 2 -->
+<div class="absolute -bottom-6 right-0 px-4 py-2 rounded-full border border-outline-variant/40 bg-surface-container-lowest/85 backdrop-blur-md shadow-2xl flex items-center gap-3">
+<span class="material-symbols-outlined text-xs text-primary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-mono-meta text-mono-meta text-on-surface text-[12px]">$14,500 Locked in Escrow</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom of Hero Controls & Indicators -->
+<div class="relative z-10 w-full max-w-7xl mx-auto px-margin pt-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-outline-variant/15">
+<!-- Bottom Scene Index -->
+<div class="flex items-center gap-4">
+<span class="font-mono-meta text-mono-meta text-primary-container">01</span>
+<div class="w-16 h-[1px] bg-outline-variant/50 relative">
+<div class="w-6 h-[1px] bg-primary-container"></div>
+</div>
+<span class="font-mono-meta text-mono-meta text-outline">03</span>
+<span class="font-label-caps text-label-caps text-outline ml-4 hidden sm:inline">PERSPECTIVE: GLOBAL SOVEREIGN CORE</span>
+</div>
+<!-- Skill Pills Camera Filter -->
+<div class="flex items-center gap-2 p-1 rounded-full border border-outline-variant/30 bg-surface-container-low/60 backdrop-blur-md">
+<button class="px-4 py-1.5 rounded-full bg-primary-container text-on-primary font-label-pill text-label-pill">
+          Design
+        </button>
+<button class="px-4 py-1.5 rounded-full text-on-surface-variant hover:text-primary font-label-pill text-label-pill transition-colors">
+          Development
+        </button>
+<button class="px-4 py-1.5 rounded-full text-on-surface-variant hover:text-primary font-label-pill text-label-pill transition-colors">
+          Writing
+        </button>
+<button class="px-4 py-1.5 rounded-full text-on-surface-variant hover:text-primary font-label-pill text-label-pill transition-colors">
+          Systems
+        </button>
+</div>
+</div>
+</section>
+<!-- 3. CONNECTION STORY & CATEGORY INDEX (Charcoal Dark) -->
+<section class="py-space-xl bg-surface-container-lowest relative border-b border-outline-variant/20" id="explore">
+<div class="w-full max-w-7xl mx-auto px-margin">
+<!-- Section Intro Heading -->
+<div class="mb-20 max-w-3xl">
+<span class="font-label-caps text-label-caps text-primary-container mb-4 block tracking-widest">
+          SYSTEM REGISTRY // 02
+        </span>
+<h2 class="font-headline-xl text-headline-xl text-tertiary font-light tracking-tight leading-tight">
+          From your idea.<br/>
+<span class="text-outline">To someone’s next big thing.</span>
+</h2>
+</div>
+<!-- Hairline Category Index (6 Rows) -->
+<div class="divide-y divide-outline-variant/20 border-y border-outline-variant/20">
+<!-- Row 1 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-design">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">01</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Design &amp; Creative Direction</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">Brand systems, spatial UI/UX, generative 3D, and design token architectures.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              142 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+<!-- Row 2 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-systems">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">02</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">terminal</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Systems &amp; Engineering</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">Distributed runtimes, Rust/Go protocols, kernel-level optimizations, and web infrastructure.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              198 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+<!-- Row 3 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-narrative">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">03</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">description</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Technical Writing &amp; Narrative</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">Protocol specifications, developer documentation, whitepapers, and investigative briefs.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              85 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+<!-- Row 4 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-spatial">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">04</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">view_in_ar</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Spatial &amp; 3D Interactive</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">WebGL, Three.js shaders, compute shaders, and immersive interactive installations.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              64 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+<!-- Row 5 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-growth">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">05</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">schema</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">Product &amp; Growth Strategy</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">Market mechanics, tokenomics, user onboarding frameworks, and venture architecture.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              91 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+<!-- Row 6 -->
+<a class="group flex flex-col md:flex-row md:items-center justify-between py-8 px-4 -mx-4 rounded-xl hover:bg-surface-container-low/50 transition-all duration-300" href="#category-ai">
+<div class="flex items-center gap-8 mb-4 md:mb-0">
+<span class="font-mono-meta text-mono-meta text-outline group-hover:text-primary-container transition-colors">06</span>
+<div class="w-10 h-10 rounded-full border border-outline-variant/40 flex items-center justify-center text-primary-container group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg">network_node</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">AI &amp; Data Infrastructure</h3>
+<p class="font-body-md text-body-md text-outline font-light mt-1">Model fine-tuning, latency-optimized pipelines, and autonomous agent workflows.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 self-end md:self-auto">
+<span class="px-3.5 py-1 rounded-full border border-outline-variant/40 bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+              112 Active Tasks
+            </span>
+<span class="w-9 h-9 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface group-hover:border-primary-container group-hover:text-primary-container group-hover:translate-x-1 transition-all">
+              →
+            </span>
+</div>
+</a>
+</div>
+</div>
+</section>
+<!-- 4. CONTRASTING EDITORIAL LIGHT SECTION (#e9e9e3) -->
+<section class="py-space-xl bg-[#e9e9e3] text-[#0c0e10] relative">
+<div class="w-full max-w-7xl mx-auto px-margin">
+<!-- Editorial Header -->
+<div class="mb-16 border-b border-[#0c0e10]/10 pb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+<div>
+<span class="font-label-caps text-label-caps text-[#0c0e10]/60 mb-2 block tracking-widest">
+            PARADIGM SHIFT // THE MECHANICS
+          </span>
+<h2 class="font-headline-xl text-headline-xl text-[#0c0e10] font-normal tracking-tight">
+            From a what if.<br/>To a job well done.
+          </h2>
+</div>
+<p class="font-body-md text-body-md text-[#0c0e10]/70 max-w-md font-normal">
+          Designed specifically to extinguish friction, endless renegotiations, and platform tolls. Everything operates through deterministic milestone custody.
+        </p>
+</div>
+<!-- Two-Column Architecture Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+<!-- Column 1: For Clients/Teams -->
+<div class="flex flex-col justify-between p-8 rounded-2xl bg-[#dfdfd8] border border-[#0c0e10]/10">
+<div class="mb-8">
+<span class="font-mono-meta text-mono-meta text-[#0c0e10]/50 mb-2 block">01 / ARCHITECTURE</span>
+<h3 class="font-headline-md text-headline-md text-[#0c0e10] font-semibold mb-3">For visionary builders</h3>
+<p class="font-body-md text-body-md text-[#0c0e10]/80 font-normal leading-relaxed">
+              Define precise deliverables, lock funding into sovereign milestone escrow, and collaborate directly with independent masters without bureaucratic middlemen.
+            </p>
+</div>
+<!-- Abstract Wireframe Visual Card -->
+<div class="w-full p-6 rounded-xl bg-[#e9e9e3] border border-[#0c0e10]/10 flex flex-col gap-4 font-mono-meta text-mono-meta text-[12px]">
+<div class="flex items-center justify-between border-b border-[#0c0e10]/10 pb-3">
+<span class="font-medium text-[#0c0e10]">TASK: SPATIAL_SHADERS_AUDIT</span>
+<span class="px-2 py-0.5 rounded-full bg-[#bfe7d2] text-[#0c0e10] text-[10px] font-semibold">ESCROW SECURED</span>
+</div>
+<!-- Progress Bar Graphic -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] text-[#0c0e10]/70">
+<span>Phase 02 // Raymarching Engine</span>
+<span>85% Verified</span>
+</div>
+<div class="w-full h-1.5 bg-[#0c0e10]/10 rounded-full overflow-hidden">
+<div class="h-full bg-[#0c0e10] w-[85%] rounded-full"></div>
+</div>
+</div>
+<!-- Wireframe Code Syntax Box -->
+<div class="p-3 rounded bg-[#0c0e10]/5 text-[#0c0e10]/80 text-[11px] font-mono leading-tight space-y-1">
+<div>&gt; verify_commit(sha256: "e4a78c91...")</div>
+<div>&gt; artifacts_status: [PASS, BENCHMARK_OK]</div>
+<div class="text-[#2a4e3e] font-semibold">&gt; state: READY_FOR_DISBURSEMENT</div>
+</div>
+</div>
+</div>
+<!-- Column 2: For Specialists/Freelancers -->
+<div class="flex flex-col justify-between p-8 rounded-2xl bg-[#dfdfd8] border border-[#0c0e10]/10">
+<div class="mb-8">
+<span class="font-mono-meta text-mono-meta text-[#0c0e10]/50 mb-2 block">02 / AUTONOMY</span>
+<h3 class="font-headline-md text-headline-md text-[#0c0e10] font-semibold mb-3">For elite practitioners</h3>
+<p class="font-body-md text-body-md text-[#0c0e10]/80 font-normal leading-relaxed">
+              Set your own cadence, retain intellectual independence, and receive guaranteed payouts upon cryptographic or milestone verification.
+            </p>
+</div>
+<!-- Abstract Telemetry Visual Card -->
+<div class="w-full p-6 rounded-xl bg-[#e9e9e3] border border-[#0c0e10]/10 flex flex-col gap-4 font-mono-meta text-mono-meta text-[12px]">
+<div class="flex items-center justify-between border-b border-[#0c0e10]/10 pb-3">
+<span class="font-medium text-[#0c0e10]">TELEMETRY // CONTRACT CUSTODY</span>
+<span class="text-[#0c0e10]/60">NET-0 SETTLEMENT</span>
+</div>
+<!-- Metric Displays -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-3 bg-[#0c0e10]/5 rounded border border-[#0c0e10]/5">
+<span class="text-[10px] text-[#0c0e10]/60 block">AVERAGE HOURLY YIELD</span>
+<span class="text-headline-md font-semibold text-[#0c0e10]">$185.00</span>
+</div>
+<div class="p-3 bg-[#0c0e10]/5 rounded border border-[#0c0e10]/5">
+<span class="text-[10px] text-[#0c0e10]/60 block">DISBURSEMENT LATENCY</span>
+<span class="text-headline-md font-semibold text-[#0c0e10]">0.42s</span>
+</div>
+</div>
+<!-- Milestone Custody Check Indicator -->
+<div class="flex items-center gap-2 text-[11px] text-[#0c0e10]/80">
+<span class="w-2 h-2 rounded-full bg-[#0c0e10]"></span>
+<span>100% Guaranteed Escrow Release on Pull-Request Merge</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. PROCESS WORKFLOW (Dark Charcoal) -->
+<section class="py-space-xl bg-surface-container-lowest border-b border-outline-variant/20 relative" id="how-it-works">
+<div class="w-full max-w-7xl mx-auto px-margin">
+<!-- Section Header -->
+<div class="mb-20">
+<span class="font-label-caps text-label-caps text-primary-container mb-2 block tracking-widest">
+          PROTOCOL EXECUTION // 03
+        </span>
+<h2 class="font-headline-xl text-headline-xl text-tertiary font-light tracking-tight">
+          How it moves.<br/>
+<span class="text-outline">Precision at every milestone.</span>
+</h2>
+</div>
+<!-- 3-Column Process Cards with Hairline Borders -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1: Discover -->
+<div class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-low/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary-container/40 transition-colors">
+<div>
+<!-- Geometric Mint Line Art: Node Aperture -->
+<div class="w-16 h-16 mb-8 rounded-full border border-primary-container/40 flex items-center justify-center relative">
+<div class="w-8 h-8 rounded-full border border-dashed border-primary-container/60"></div>
+<div class="w-2 h-2 rounded-full bg-primary-container absolute shadow-[0_0_8px_#bfe7d2]"></div>
+</div>
+<span class="font-mono-meta text-mono-meta text-primary-container mb-2 block">01 / DISCOVER</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-3">Target &amp; Scope</h3>
+</div>
+<p class="font-body-md text-body-md text-outline font-light mt-4 leading-relaxed">
+            Curate or publish precise task briefs with explicit milestone expectations, artifact deliverables, and mathematical constraints.
+          </p>
+</div>
+<!-- Card 2: Agree -->
+<div class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-low/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary-container/40 transition-colors">
+<div>
+<!-- Geometric Mint Line Art: Interlocking Cryptographic Rings -->
+<div class="w-16 h-16 mb-8 flex items-center justify-center relative">
+<div class="w-10 h-10 rounded-full border border-primary-container/40 -mr-3"></div>
+<div class="w-10 h-10 rounded-full border border-secondary/50 -ml-3"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary-container absolute"></div>
+</div>
+<span class="font-mono-meta text-mono-meta text-primary-container mb-2 block">02 / AGREE</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-3">Lock Sovereign Escrow</h3>
+</div>
+<p class="font-body-md text-body-md text-outline font-light mt-4 leading-relaxed">
+            Funds commit to sovereign escrow before a single line of work begins. No arbitrary chargebacks or scope-creep ambiguities.
+          </p>
+</div>
+<!-- Card 3: Deliver -->
+<div class="p-8 rounded-2xl border border-outline-variant/30 bg-surface-container-low/40 backdrop-blur-sm flex flex-col justify-between hover:border-primary-container/40 transition-colors">
+<div>
+<!-- Geometric Mint Line Art: Constellation Expansion -->
+<div class="w-16 h-16 mb-8 relative flex items-center justify-center">
+<div class="w-12 h-12 border border-outline-variant/40 rotate-45"></div>
+<div class="w-1.5 h-1.5 bg-primary-container rounded-full absolute -top-1"></div>
+<div class="w-1.5 h-1.5 bg-primary-container rounded-full absolute -bottom-1"></div>
+<div class="w-1.5 h-1.5 bg-secondary rounded-full absolute -left-1"></div>
+<div class="w-1.5 h-1.5 bg-secondary rounded-full absolute -right-1"></div>
+</div>
+<span class="font-mono-meta text-mono-meta text-primary-container mb-2 block">03 / DELIVER</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-3">Disburse on Verification</h3>
+</div>
+<p class="font-body-md text-body-md text-outline font-light mt-4 leading-relaxed">
+            Inspect production-grade artifacts and disburse escrow with a single action. Direct transfer to preferred sovereign balances.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. CLOSING CTA (Full-bleed Dark) -->
+<section class="py-32 bg-surface-container-lowest relative overflow-hidden">
+<!-- Background Horizon Arc -->
+<div class="absolute -bottom-72 left-1/2 -translate-x-1/2 w-[1200px] h-[500px] rounded-[100%] border-t border-primary-container/20 bg-gradient-to-b from-primary-container/5 to-transparent blur-sm pointer-events-none"></div>
+<div class="w-full max-w-7xl mx-auto px-margin text-center relative z-10">
+<!-- Headline -->
+<h2 class="font-display-hero text-display-hero text-tertiary mb-8 font-light tracking-tight">
+        Let’s make what’s next.
+      </h2>
+<p class="font-body-lg text-body-lg text-outline max-w-xl mx-auto mb-12 font-light">
+        Join the planetary ecosystem of sovereign engineering and high-order craft. No friction, no intermediaries.
+      </p>
+<!-- Dual Capsule CTAs -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-5">
+<button class="px-8 py-3.5 rounded-full bg-primary-container text-on-primary font-body-md text-body-md font-medium hover:bg-primary-fixed hover:shadow-[0_0_24px_rgba(191,231,210,0.3)] transition-all">
+          Post a task now
+        </button>
+<button class="px-8 py-3.5 rounded-full border border-outline-variant/50 text-tertiary font-body-md text-body-md hover:border-secondary hover:text-primary transition-all">
+          Browse live tasks
+        </button>
+</div>
+<!-- Network Status Subtext -->
+<div class="mt-16 inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-outline-variant/30 bg-surface-container-low/50">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_#bfe7d2]"></span>
+<span class="font-mono-meta text-mono-meta text-outline text-[12px]">Network 100% Operational • Sovereign Escrow Active</span>
+</div>
+</div>
+</section>
+<!-- 7. FOOTER (Shared Component Mapping) -->
+<footer class="w-full border-t border-outline-variant/20 bg-background text-primary-container">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin py-space-xl w-full max-w-7xl mx-auto gap-6">
+<!-- Copyright text -->
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md text-primary tracking-tighter">tasky.</span>
+<span class="text-on-surface-variant font-mono-meta text-mono-meta">
+          © 2024 tasky. All rights reserved. Planetary orchestration for elite craft.
+        </span>
+</div>
+<!-- Footer Navigation Links -->
+<div class="flex items-center gap-6">
+<a class="text-on-surface hover:text-primary transition-colors duration-150 font-body-md text-body-md" href="#explore">
+          Explore
+        </a>
+<a class="text-on-surface-variant font-mono-meta text-mono-meta hover:text-primary transition-colors duration-150" href="#manifesto">
+          Manifesto
+        </a>
+<a class="text-on-surface-variant font-mono-meta text-mono-meta hover:text-primary transition-colors duration-150" href="#privacy">
+          Privacy
+        </a>
+<a class="text-on-surface-variant font-mono-meta text-mono-meta hover:text-primary transition-colors duration-150" href="#terms">
+          Terms
+        </a>
+<a class="text-on-surface-variant font-mono-meta text-mono-meta hover:text-primary transition-colors duration-150" href="#support">
+          Support
+        </a>
+</div>
+</div>
+</footer>
+</body></html>

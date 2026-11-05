@@ -1,22 +1,27 @@
-# UI design handoff
+# Tasky v2 design handoff — final reference
 
-Reference: https://www.upwork.com/ (inspected in browser on 31 October 2026).
+The final reference is https://hamol.studio/, inspected in Chrome on 5 November 2026. This supersedes Upwork and the abandoned Carnilove direction.
 
-Google Stitch project: `projects/1819106165016390287` (Tasky Version 2, private).
-Homepage screen: `024942b8f30c4664a101a37f083195f6`.
-Design system: `assets/d547d29141dd460993c082cf18916354` (Heritage Editorial Marketplace).
-Raw generated reference: `stitch-homepage.html`. This is a design reference, not application code; generated marketing claims and financial illustrations are not implemented features.
+## Reference inspection
 
-## Implemented direction
+Inspected the full homepage: pinned space hero; scroll-controlled orbital objects with changing copy, scale, position and scene index; Earth transition; connection story; hairline project index; contrasting light studio and team section; process illustrations; oversized closing CTA.
 
-- Warm white canvas, deep forest green, lime accents, Playfair Display headings and Plus Jakarta Sans interface text with local font fallbacks.
-- Two-column editorial hero, CSS creative-work illustration, real task search, keyword chips, six category discovery links, and Discover / Connect / Deliver section.
-- Responsive layout, keyboard focus treatment, input labels, skip link, reduced-motion support, and task loading/error/empty states with retry.
-- Categories adapted to Tasky's current data model. Category cards launch keyword searches; they do not introduce unsupported category values.
-- Removed generated claims about verified talent, active contracts and protected escrow. No invented reviews, user counts, or client logos.
+## Google Stitch
 
-## Validation
+Project: projects/1819106165016390287. New screen: 05585118051444579d404120dccb8cde (Tasky — Hamol Spatial Homepage). Design system: assets/328c0966fb7d402e9c23e82d9f0e562b. Raw generated source: stitch-hamol-homepage.html.
 
-Production build and API syntax checks pass. Browser verified search submission and retained keyword, unavailable database messaging, retry, home navigation, and desktop/mobile rendering. Mobile viewport had no page overflow. Live task results and pagination still require a configured development database; no production database was accessed.
+Stitch is a visual reference, not shipped application code. Its invented escrow, guaranteed payout, task counts, contract custody and network-status claims were explicitly excluded. Payments remain disabled. No reference-site logos, portraits, models or proprietary assets were copied.
 
-Stitch suggested next screens: Explore tasks marketplace, mobile homepage, and milestone contract detail. These are suggestions for future design work; the contract feature still requires product and backend validation.
+## Implemented
+
+- Manrope, charcoal #0c0e10, offwhite #e9e9e3, mint accents, subtle blue metallic artwork; capsule navigation and CTAs, generous spacing, fine borders.
+- Original lazy-loaded Three.js scene: faceted metallic orbital bodies, star field, moons, drag rotation, four scroll-driven scenes, changing marketplace copy and keyboard-operable chapter controls.
+- Native scrolling with a sticky scene rather than wheel interception. CSS horizon and fallback sphere. Scene pauses offscreen; animation pause control, reduced-motion adaptation, renderer cleanup and context-loss fallback.
+- Connection story, six category rows connected to real task search, client/freelancer artwork and CTAs, process cards, closing CTA. No fake team members, reviews or statistics.
+- Shared account/task/messaging typography and surface styling, saved light/dark toggle with system default applied before rendering. Homepage intentionally uses the reference’s dark/light section contrast in both modes.
+
+## Verification
+
+Production build and API syntax checks passed. Integration suite passed (two tests). Chrome verified the desktop 3D scene, scroll/chapter copy changes, skill anchor navigation, 390×844 mobile layout without horizontal overflow, both account themes, and preference persistence after reload. Local browser preview has no API server; hosted API acceptance is checked separately.
+
+The artwork is a procedural interpretation of the reference, not its exact WebGL implementation or Earth imagery.
