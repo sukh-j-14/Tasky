@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
+  hiddenFor: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   clientMessageId: { type: String, maxlength: 80 },
   // Conversation Details
   conversationId: { 

@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { Field, FormStatus } from './shared';
+import { GoogleSignIn } from './GoogleSignIn';
 
 export function Account({ signup = false }) {
   const auth = useAuth(), navigate = useNavigate(), location = useLocation();
@@ -19,7 +20,7 @@ export function Account({ signup = false }) {
   }
   return <section className="section account"><p className="eyebrow">YOUR NEXT CHAPTER</p><h1>{signup ? 'Make room for possibility.' : 'Welcome back.'}</h1><p className="intro">{signup ? 'One account to find work and bring your projects to life.' : 'Good work is waiting. Let’s get back to it.'}</p><form className="panel form-grid" onSubmit={submit}>
     {signup && <><Field label="First name" name="firstName" required autoComplete="given-name" maxLength={70}/><Field label="Last name" name="lastName" required autoComplete="family-name" maxLength={70}/><Field label="Username" name="username" required autoComplete="username" pattern="[A-Za-z0-9_-]{3,30}" title="3–30 letters, numbers, underscores or hyphens"/></>}
-    <Field label="Email" name="email" type="email" autoComplete="email" required/><Field label="Password" name="password" type="password" minLength={8} maxLength={128} required autoComplete={signup ? 'new-password' : 'current-password'}/><FormStatus error={error}/><button className="button" disabled={busy}>{busy ? 'Please wait…' : signup ? 'Create account' : 'Log in'}</button></form><p className="account-switch">{signup ? 'Already have an account?' : 'New to Tasky?'} <Link to={signup ? '/login' : '/signup'} state={location.state}>{signup ? 'Log in' : 'Create an account'}</Link></p></section>;
+    <Field label="Email" name="email" type="email" autoComplete="email" required/><Field label="Password" name="password" type="password" minLength={8} maxLength={128} required autoComplete={signup ? 'new-password' : 'current-password'}/><FormStatus error={error}/><button className="button" disabled={busy}>{busy ? 'Please wait…' : signup ? 'Create account' : 'Log in'}</button></form><GoogleSignIn onSuccess={user => { auth.setUser(user); navigate(target, { replace: true }); }}/><p className="account-switch">{signup ? 'Already have an account?' : 'New to Tasky?'} <Link to={signup ? '/login' : '/signup'} state={location.state}>{signup ? 'Log in' : 'Create an account'}</Link></p></section>;
 }
 
 export function Profile() {

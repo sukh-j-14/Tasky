@@ -1,0 +1,22 @@
+name: Version 2 checks
+on:
+  push:
+    branches: [codex/tasky-version-2]
+  pull_request:
+    paths: ['version 2/**']
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: version 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: version 2/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test

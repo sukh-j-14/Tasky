@@ -6,9 +6,15 @@ const fs = require('node:fs');
 
 function createApp({ connectOnRequest = false } = {}) {
   const app = express();
+  if (process.env.ABLY_API_KEY) app.locals.realtime = require('./services/ably').hostedRealtime();
   app.disable('x-powered-by');
   if (process.env.VERCEL) app.set('trust proxy', 1);
   const origins = (process.env.APP_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:5002').split(',').map(value => value.trim());
+  if (process.env.VERCEL_ENV === 'preview') {
+    for (const host of [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]) {
+      if (host && /^[a-zA-Z0-9.-]+\.vercel\.app$/.test(host)) origins.push(`https://${host}`);
+    }
+  }
   app.use(require('cors')({ origin(origin, callback) { callback(null, !origin || origins.includes(origin)); }, credentials: true }));
   app.use((req, res, next) => {
     res.set('X-Content-Type-Options', 'nosniff');
@@ -31,6 +37,7 @@ function createApp({ connectOnRequest = false } = {}) {
     res.status(mongoose.connection.readyState === 1 ? 200 : 503).json({ database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' });
   });
   app.get('/api/realtime/config', (_req, res) => {
+    if (process.env.ABLY_API_KEY) return res.json({ transport: 'ably' });
     if (process.env.VERCEL) return res.status(503).json({ message: 'Live messaging is not configured for this deployment.' });
     res.json({ transport: 'websocket' });
   });
@@ -57,6 +64,10 @@ function createApp({ connectOnRequest = false } = {}) {
   for (const [prefix, file] of Object.entries({
     auth: 'authRoutes', tasks: 'taskRoutes', bids: 'bidRoutes', messages: 'messageRoutes'
   })) app.use(`/api/${prefix}`, require(`./routes/${file}`));
+  app.post('/api/realtime/token', require('./middlewars/auth.middleware').authenticateUser, async (req, res) => {
+    try { res.json(await require('./services/ably').tokenFor(req.user._id)); }
+    catch { res.status(503).json({ message: 'Live messaging is temporarily unavailable.' }); }
+  });
   app.get('/api/avatars/:id', async (req, res, next) => {
     try {
       if (!mongoose.isValidObjectId(req.params.id)) return res.sendStatus(404);

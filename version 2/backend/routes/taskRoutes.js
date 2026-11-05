@@ -9,7 +9,7 @@ const authMiddleware = require('../middlewars/auth.middleware')
 const jwt = require("jsonwebtoken")
 const router = express.Router();
 
-const MAX_TASK_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_TASK_FILE_SIZE = 3 * 1024 * 1024;
 const allowedTaskFileExtensions = new Set(['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png']);
 const allowedTaskMimeTypes = new Set([
   'application/pdf',
@@ -41,7 +41,7 @@ const runTaskFileUpload = (req, res, next) => {
   taskFileUpload.single('taskFile')(req, res, error => {
     if (!error) return next();
     if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'The document must be 10MB or smaller.' });
+      return res.status(400).json({ message: 'The document must be 3MB or smaller.' });
     }
     return res.status(400).json({ message: error.message || 'Could not upload the document.' });
   });

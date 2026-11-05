@@ -170,6 +170,7 @@ exports.googleAuth = async (req, res) => {
       user.isVerified = true;
     }
 
+    if (!user.isActive) return res.status(403).json({error:'Account is deactivated'});
     await user.save();
     const token = user.generateAuthToken();
     setAuthCookie(res, token);

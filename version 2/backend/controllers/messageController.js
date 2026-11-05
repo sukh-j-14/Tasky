@@ -112,6 +112,7 @@ exports.getConversations = async (req, res) => {
 
         return {
           ...conversation.toObject(),
+          lastMessage: conversation.lastMessage?.hiddenFor?.some(id => String(id) === String(userId)) ? null : conversation.lastMessage,
           unreadCount
         };
       })
@@ -154,6 +155,7 @@ exports.getMessages = async (req, res) => {
 
     const messages = await Message.find({
       conversationId,
+      hiddenFor: { $ne: userId },
       $or: [
         { isDeleted: false },
         { isDeleted: true, deletedBy: { $ne: userId } } // Show messages not deleted by this user
@@ -180,7 +182,8 @@ exports.getMessages = async (req, res) => {
 
     const total = await Message.countDocuments({
       conversationId,
-      isDeleted: false
+      hiddenFor: { $ne: userId },
+      $or: [{ isDeleted: false }, { isDeleted: true, deletedBy: { $ne: userId } }]
     });
 
     res.json({
@@ -200,7 +203,7 @@ exports.getMessages = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const result = await require('../services/chat').sendMessage(req.user._id, { ...req.body, conversationId: req.params.conversationId });
-    req.app.locals.realtime?.publish(result.participants, { type: 'message:new', message: result.message });
+    await req.app.locals.realtime?.publish(result.participants, { type: 'message:new', message: result.message });
     res.status(201).json({ newMessage: result.message });
   } catch (error) {
     res.status(error.status || 500).json({ message: error.status ? error.message : 'Could not send message.' });
@@ -213,8 +216,8 @@ exports.editMessage = async (req, res) => {
     const { message } = req.body;
     const userId = req.user._id;
 
-    if (!message) {
-      return res.status(400).json({ message: 'Message content is required' });
+    if (typeof message !== 'string' || !message.trim() || message.length > 2000) {
+      return res.status(400).json({ message: 'Enter a message of 1–2000 characters' });
     }
 
     const existingMessage = await Message.findById(messageId);
@@ -233,6 +236,7 @@ exports.editMessage = async (req, res) => {
       return res.status(400).json({ message: 'Message is too old to edit' });
     }
 
+    if (existingMessage.isSystemMessage) return res.status(403).json({message:'System messages cannot be edited.'});
     // Save original message to edit history
     if (!existingMessage.isEdited) {
       existingMessage.editHistory = [{
@@ -252,6 +256,8 @@ exports.editMessage = async (req, res) => {
     existingMessage.editedAt = new Date();
 
     await existingMessage.save();
+    await existingMessage.populate('senderId', 'firstName lastName profilePicture');
+    req.app.locals.realtime?.publish([String(existingMessage.senderId._id), String(existingMessage.receiverId)].filter(id => !existingMessage.hiddenFor.some(hidden => String(hidden) === id)), {type: 'message:new', message: existingMessage});
 
     res.json({ 
       message: 'Message edited successfully',
@@ -284,9 +290,7 @@ exports.deleteMessage = async (req, res) => {
     }
 
     // Soft delete for this user
-    message.isDeleted = true;
-    message.deletedAt = new Date();
-    message.deletedBy = userId;
+    if (!message.hiddenFor.some(id => String(id) === String(userId))) message.hiddenFor.push(userId);
 
     await message.save();
 

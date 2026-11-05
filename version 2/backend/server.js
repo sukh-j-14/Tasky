@@ -15,7 +15,7 @@ async function start() {
   const app = createApp();
   const server = createServer(app);
   const origins = (process.env.APP_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:5002').split(',').map(value => value.trim());
-  const realtime = attachRealtime(server, { origins });
+  const realtime = process.env.ABLY_API_KEY ? app.locals.realtime : attachRealtime(server, { origins });
   app.locals.realtime = realtime;
   server.listen(process.env.PORT || 5002, () => console.log('Tasky v2 API and WebSockets ready'));
   for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {

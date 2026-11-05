@@ -1,0 +1,10 @@
+version 1
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/uploads
+**/dist
+**/tests
+**/docs
+**/.lockfile-refresh

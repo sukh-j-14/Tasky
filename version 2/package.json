@@ -19,6 +19,6 @@
     "mongodb-memory-server": "^11.3.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": "22.x"
   }
 }

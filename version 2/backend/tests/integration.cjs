@@ -40,8 +40,16 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     assert.ok(login.cookie.includes('token='));
     const profile = await request('/auth/profile', { cookie: worker.cookie, method: 'PUT', body: { bio: 'Hello from React', skills: ['React'] } });
     assert.equal(profile.data.user.bio, 'Hello from React');
-    const created = await request('/tasks', { method: 'POST', cookie: client.cookie, status: 201, body: { title: 'Build a React website', description: 'A responsive product website', category: 'coding', budget: 5000, deadline: new Date(Date.now() + 7 * 86400000).toISOString(), contactMethod: 'email', skills: ['React'] } });
+    const documentBody = new FormData();
+    documentBody.set('taskFile', new Blob(['%PDF-1.4\nTest document'], {type:'application/pdf'}), 'brief.pdf');
+    const uploadResponse = await fetch(base+'/api/tasks/attachments', {method:'POST', headers:{Cookie:client.cookie}, body:documentBody});
+    assert.equal(uploadResponse.status,201);
+    const attachment=(await uploadResponse.json()).attachment;
+    const created = await request('/tasks', { method: 'POST', cookie: client.cookie, status: 201, body: { title: 'Build a React website', description: 'A responsive product website', category: 'coding', budget: 5000, deadline: new Date(Date.now() + 7 * 86400000).toISOString(), contactMethod: 'email', skills: ['React'], attachments:[attachment] } });
     const taskId = created.data._id;
+    const documentResponse=await fetch(base+attachment.url,{headers:{Cookie:worker.cookie}});
+    assert.equal(documentResponse.status,200); assert.match(await documentResponse.text(),/Test document/);
+    assert.equal((await fetch(base+attachment.url)).status,401);
     const browse = await request('/tasks?search=React'); assert.equal(browse.data.total, 1);
     await request(`/tasks/${taskId}`, { cookie: worker.cookie });
     await request(`/tasks/${taskId}`, { cookie: worker.cookie, method: 'PUT', status: 404, body: { title: 'not mine' } });
@@ -67,6 +75,21 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     const blocked = event(outsiderSocket, 'message:error'); outsiderSocket.send(JSON.stringify({ ...payload, requestId: 'forbidden', clientMessageId: 'outsider-message' }));
     assert.match((await blocked).message, /unavailable/); assert.equal(leaked, false);
     const history = await request(`/messages/conversations/${conversationId}/messages`, { cookie: client.cookie }); assert.equal(history.data.messages[0].message, payload.message);
+    const offer = await request('/bids/'+bid.data.bid._id+'/counter-offers', { method:'POST', cookie:client.cookie, status:201, body:{amount:4200} });
+    const offerId = offer.data.bid.counterOffers[0]._id;
+    await request('/bids/'+bid.data.bid._id+'/counter-offers/'+offerId+'/accept', { method:'POST', cookie:client.cookie, status:400 });
+    await request('/bids/'+bid.data.bid._id+'/counter-offers/'+offerId+'/accept', { method:'POST', cookie:worker.cookie });
+    const messageId = history.data.messages[0]._id;
+    await request('/messages/messages/'+messageId, {method:'PUT',cookie:client.cookie,status:403,body:{message:'not mine'}});
+    await request('/messages/messages/'+messageId, {method:'PUT',cookie:worker.cookie,body:{message:'Updated message'}});
+    await request('/messages/messages/'+messageId, {method:'DELETE',cookie:client.cookie});
+    const clientHistory=await request('/messages/conversations/'+conversationId+'/messages',{cookie:client.cookie});
+    assert.equal(clientHistory.data.messages.some(item=>item._id===messageId),false);
+    const workerHistory=await request('/messages/conversations/'+conversationId+'/messages',{cookie:worker.cookie});
+    assert.equal(workerHistory.data.messages.find(item=>item._id===messageId).message,'Updated message');
+    await request('/messages/messages/'+messageId, {method:'DELETE',cookie:worker.cookie});
+    const hiddenHistory=await request('/messages/conversations/'+conversationId+'/messages',{cookie:worker.cookie});
+    assert.equal(hiddenHistory.data.messages.some(item=>item._id===messageId),false);
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: worker.cookie, status: 403 });
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: client.cookie });
     const inProgress = await request(`/tasks/${taskId}`); assert.equal(inProgress.data.status, 'in-progress');
@@ -82,6 +105,12 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     }
     await denied({ origin: 'http://localhost:5173' }, 401);
     await denied({ origin: 'https://untrusted.example', headers: { Cookie: client.cookie } }, 403);
+    process.env.ABLY_API_KEY='test.key:dGVzdC1vbmx5LXNpZ25pbmcta2V5';
+    const signed = await request('/realtime/token',{method:'POST',cookie:worker.cookie});
+    assert.equal(signed.data.clientId,String(worker.data.user.id));
+    assert.deepEqual(JSON.parse(signed.data.capability),{['tasky-v2:user:'+worker.data.user.id]:['subscribe']});
+    await request('/realtime/token',{method:'POST',status:401});
+    delete process.env.ABLY_API_KEY;
     const closed = once(workerSocket, 'close'); await request('/auth/logout', { method: 'POST', cookie: worker.cookie }); await closed;
   } finally {
     for (const ws of sockets) ws.terminate(); realtime?.close();
@@ -91,3 +120,19 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
 });
 
 
+
+test('reconnects after a cached database connection disconnects', {timeout:60000}, async()=>{
+ const database=await MongoMemoryReplSet.create({replSet:{count:1}});
+ const previousUri=process.env.MONGODB_URI,previousName=process.env.MONGODB_DB_NAME;
+ try{
+  process.env.MONGODB_URI=database.getUri();process.env.MONGODB_DB_NAME='tasky_reconnect_test';
+  const {connectDatabase}=require('../database');
+  await connectDatabase();assert.equal(mongoose.connection.readyState,1);
+  await mongoose.disconnect();assert.equal(mongoose.connection.readyState,0);
+  await connectDatabase();assert.equal(mongoose.connection.readyState,1);
+ }finally{
+  await mongoose.disconnect();await database.stop();
+  if(previousUri===undefined)delete process.env.MONGODB_URI;else process.env.MONGODB_URI=previousUri;
+  if(previousName===undefined)delete process.env.MONGODB_DB_NAME;else process.env.MONGODB_DB_NAME=previousName;
+ }
+});

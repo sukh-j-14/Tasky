@@ -1,37 +1,16 @@
 # Tasky version 2
 
-React JS frontend, Node.js / Express backend, MongoDB Atlas database, and authenticated WebSocket messaging. The UI follows the Upwork reference and the Google Stitch concept recorded in docs/design.md.
+React JS frontend, Node.js / Express backend, MongoDB Atlas, and authenticated WebSocket messaging with Ably for Vercel deployments.
 
-## Structure
+- frontend/: React app, UI, API client and messaging transport.
+- backend/: Express routes, controllers, models, storage and realtime adapters.
+- docs/progress.md: detailed implementation, test evidence, current work and remaining items.
+- docs/vercel.md: separate preview deployment instructions.
 
-- frontend/: React pages, account state, API client, WebSocket client and responsive styles.
-- backend/: Express routes, controllers, MongoDB models, chat service and WebSocket server.
-- backend/tests/: integration test using a disposable local MongoDB instance.
-- docs/: design provenance and infrastructure notes.
+From version 2: npm install, npm run dev, then open http://localhost:5173. The backend runs on 5002. Existing local backend/.env is configured and ignored by Git; do not overwrite it. Fresh checkouts can copy backend/.env.example and supply their own values. Add ABLY_API_KEY server-side to use hosted messaging locally; without it, local development uses the Node WebSocket server.
 
-## Run
+npm run check builds React and checks backend entrypoints. npm test verifies the core lifecycle and reconnection behavior using disposable MongoDB replicas. npm run db:prepare creates required database indexes. The first test run may download an official MongoDB binary.
 
-From version 2, run npm install, then npm run dev. Open http://localhost:5173. The frontend runs on 5173 and proxies /api, /uploads and /ws to the backend on 5002.
+The separate Vercel project builds from the repository ROOT using root vercel.json and root api/index.js. These adapters preserve the version 2 folder name while avoiding spaces in Vercel function names. Keep version 1's main deployment and domain unchanged until v2 is tested and explicitly approved for promotion.
 
-The local backend/.env has been configured for the new Atlas development cluster and is ignored by Git. Do not overwrite it with the example file. A fresh checkout requires copying backend/.env.example to backend/.env and supplying database credentials and a random JWT_SECRET. Add the connecting computer's public IP to the Atlas project's network access list before starting the backend. APP_ORIGIN must list the exact browser origin; production requires HTTPS origins and NODE_ENV=production.
-
-npm run check checks API entrypoints and builds React. npm test exercises the full account/project/chat lifecycle against an isolated MongoDB database; its first run downloads an official MongoDB binary. npm run build builds React. npm start serves the API, WebSocket endpoint and built React files on port 5002. For Vercel setup and the remaining realtime integration blocker, see docs/vercel.md. Local development supports the existing WebSocket server; Vercel requires a managed realtime integration before launch.
-
-## Implemented
-
-- Email/password signup, login, cookie sessions, protected pages and logout.
-- Profile editing and profile image upload.
-- Task search, pagination, task details, posting and editing.
-- Dashboard showing posted projects and proposals.
-- Proposal creation, review, acceptance, decline and withdrawal; task completion.
-- Conversation list, stored message history, WebSocket send/delivery, automatic reconnection, acknowledgements and duplicate-send protection.
-- Origin checks and conversation membership checks. Public task responses exclude contact details. Version 1 remains preserved independently.
-
-## Validation and limits
-
-Integration tests cover signup/login, profile updates, task posting/search, owner restrictions, proposals, acceptance/completion, persisted live messages, duplicate retry, outsider denial, origin denial and socket closure on logout. Browser checks confirmed React signup, dashboard navigation and project posting through to its detail page. Frontend production build passes.
-
-Atlas project, free cluster and scoped database user are created. Live Atlas connectivity remains unverified until this computer is added to the network access list. Integration and browser tests used isolated local MongoDB, not Atlas or production data.
-
-Google authentication remains available in the backend but its React sign-in UI and OAuth client configuration are pending. Supporting document upload, price negotiation and message edit/delete APIs are retained in the backend; their React controls are pending. Payments remain disabled; no payment provider or production deployment is configured. The separate Vercel testing configuration is included. Profile images are stored in MongoDB GridFS and work without persistent local disk. Proposal creation and acceptance use MongoDB transactions; prepare database indexes with npm run db:prepare. Live chat broadcasts run in one Node process; multiple backend replicas would require a shared event transport.
-
+Dodo Payments is intentionally deferred until the final stage. Live payments, escrow and payouts are disabled. See docs/progress.md for what is implemented versus what has been verified on the hosted preview.

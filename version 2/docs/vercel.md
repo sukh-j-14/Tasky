@@ -1,32 +1,17 @@
-# Version 2 testing on Vercel
+# Vercel test deployment
 
-Keep the existing version 1 deployment connected to main. Do not change its root directory, production branch, environment variables or main domain.
+Keep the existing Tasky/version 1 Vercel project and main domain unchanged.
 
-Create a SEPARATE Vercel project connected to sukh-j-14/Tasky for testing version 2. Set its Root Directory to `version 2`. Deploy `codex/tasky-version-2` to that project's own .vercel.app URL. Do not attach the main customer domain. Configuration is in version 2/vercel.json: static React build plus one Express API function, placed near Atlas in Mumbai.
+The separate tasky-v2-testing project now builds from the repository ROOT. Root api/index.js is a thin adapter for version 2/backend; root vercel.json installs/builds the version 2 workspace and serves version 2/frontend/dist. This avoids Vercel's rejection of a serverless function name containing the space in version 2.
 
-## Environment variables
+Use preview deployments of codex/tasky-version-2, with encrypted/sensitive preview variables: MONGODB_URI, MONGODB_DB_NAME=tasky_v2, JWT_SECRET, GOOGLE_CLIENT_ID (reused Tasky Production client), APP_ORIGIN, ABLY_API_KEY, NODE_ENV=production, ENABLE_PAYMENTS=false. Never put credentials in VITE_ variables. Preview origins are additionally derived from Vercel's own deployment/branch URL environment values.
 
-Set these in the separate test project's deployment environment:
-- MONGODB_URI: the generated Atlas connection string, transferred securely from ignored backend/.env.
-- MONGODB_DB_NAME: tasky_v2.
-- JWT_SECRET: a separate random secret of at least 32 characters.
-- APP_ORIGIN: exact HTTPS test origin, no trailing slash. List additional approved origins with commas.
-- NODE_ENV: production.
-- ENABLE_PAYMENTS: false.
+The Atlas v2 development cluster's all-IP network policy was explicitly approved for Vercel egress. It does not apply to the production Atlas project. Index preparation completed on tasky_v2.
 
-Never prefix database credentials or JWT_SECRET with VITE_. Configure Atlas network access for the Vercel function's egress, using an approved fixed-egress option or explicitly approved network policy. This computer's IP is insufficient for Vercel hosting. Do not automatically add 0.0.0.0/0.
+Ably delivers live updates using WebSockets. Express persists and authorizes every message; browser tokens can only subscribe to the requesting user's channel. Local development can continue using the direct Node WebSocket server when no ABLY_API_KEY is set.
 
-Before testing, run npm run db:prepare with the test Atlas environment to create required unique and TTL indexes. This prevents duplicate bids/messages and cleans up rate-limit windows. It creates indexes without dropping existing data; use only the version 2 database. Keep preview and production databases and session secrets separate.
+Run npm ci --include=dev, npm run check and npm test in version 2. The lockfile contains Linux as well as Windows native build packages. Run npm run db:prepare against only the intended database when preparing indexes.
 
-## Messaging blocker
+A READY preview and hosted account/task posting have been observed. Complete the latest reconnection fix's hosted checks and the Ably/Google interactive tests before calling the app ready for customers. Dodo Payments is deferred until the end by user instruction.
 
-Vercel Functions cannot host the existing persistent WebSocket server. Local messaging still uses the tested authenticated Node WebSocket server. On Vercel the UI explicitly reports live messaging unavailable and disables sending until a managed realtime integration is provisioned and connected. Stored conversations remain readable. Do not consider the deployment ready for customer launch yet.
-
-Vercel account login succeeded. Marketplace discovery returned only Resend email for messaging, which does not meet the WebSocket requirement. A dedicated realtime provider account (such as Ably or Pusher) must be selected and provisioned before implementing its authenticated transport for public launch. No unprovisioned provider SDK or mock service was added.
-
-## Test before promotion
-
-Run npm ci, npm run check, npm test. Verify /api/ready returns connected on the deployed URL. Then test two distinct customer accounts: signup, profile image, task post/edit/search, proposal submission/duplicate rejection, accept/decline/withdraw, task completion, privacy restrictions and live message history/delivery once the realtime provider is integrated. Test on mobile and verify expiry/logout. Payment collection remains unavailable.
-
-After version 2 passes your review, explicitly approve moving the main domain. That is a separate promotion step; pushing this branch does not replace version 1. No production deployment has been performed by this work.
-
+Promotion to the main domain remains a separate, explicit approval step. See progress.md for the detailed current implementation and validation status.
