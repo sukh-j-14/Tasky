@@ -16,25 +16,25 @@
 
 ## Infrastructure and observed deployment results
 
-- GitHub branch: codex/tasky-version-2. The initial implementation was pushed as e9d83e8; subsequent work is being committed separately.
+- GitHub branch: codex/tasky-version-2. The initial implementation was pushed as e9d83e8; the completed UI/realtime/deployment work was pushed as 621fa45.
 - Separate Vercel project: tasky-v2-testing. No main customer domain attached or promoted.
 - Separate MongoDB Atlas development project and free Mumbai cluster: TaskyV2Dev; database tasky_v2. Scoped database account and required indexes are created.
 - User approved 0.0.0.0/0 access ONLY on the isolated v2 Atlas development project for Vercel egress. Production Atlas access was not changed.
 - Ably app Tasky v2 Development created; restricted backend key stored server-side in the Vercel preview environment. No key is included in React.
 - Vercel build issues fixed: development build dependencies, missing Linux Rollup package in the Windows-generated lockfile, and function names containing the space in version 2. A root api/index.js and root vercel.json deploy adapter preserves the requested folder names.
 - The preview at https://tasky-v2-testing-hlsuivpz3-sukhpreet-singhs-projects-46c3ca60.vercel.app reached READY. API readiness returned database connected. Chrome verified account creation and task posting against Atlas.
-- The Chrome two-account test then exposed an idle connection reconnection failure. A fix and regression test have been added; the updated build must be redeployed and rechecked.
+- The Chrome two-account test exposed an idle connection reconnection failure. The fix and regression test pass, and the updated preview successfully handled hosted login, task access, proposal submission, Ably WebSocket connection and message sending.
 
 ## Test evidence
 
-npm run check passes. npm test passes both integration tests: full account/task/proposal/message lifecycle and cached database reconnection. Additional assertions cover document upload/download authorization, price negotiations, unauthorized message edits, per-user hiding and user-scoped Ably token capabilities. Tests use isolated MongoDB replicas; they do not prove hosted Ably delivery or Google OAuth consent end to end.
+npm run check passes. npm test passes both integration tests: full account/task/proposal/message lifecycle and cached database reconnection. Additional assertions cover document upload/download authorization, price negotiations, unauthorized message edits, per-user hiding and user-scoped Ably token capabilities. Automated tests use isolated MongoDB replicas. Chrome separately verified hosted Ably connection and message sending. Simultaneous delivery in two independent customer sessions and the full Google OAuth consent round-trip remain to be checked.
 
 ## Current work
 
-1. Deploy the reconnection fix and finish hosted two-user task/proposal/message delivery testing in Chrome.
+1. Finish simultaneous two-session message delivery, mobile and idle/reconnect browser regression testing on the working hosted preview.
 2. Validate Google OAuth authorized origins for the v2 test URL without removing version 1 origins.
-3. Review unused Google Cloud OAuth client IDs. Active clients identified so far: RetailPulse Web — Production in RetailPulse; Tasky Production in restropilot-ai (matches the app's configured client). Fingenie has no OAuth clients. No client has been deleted or established as unused.
-4. Push the remaining validated changes to the v2 GitHub branch and keep the deployment guide current.
+3. OAuth cleanup inventory completed across all five visible projects: RetailPulse has RetailPulse Web — Production; restropilot-ai has Tasky Production (matches the app configuration); Fingenie, Gemini API and ace-cargo have no OAuth clients. No clearly unused OAuth client was found, so no client was deleted. API keys and service accounts were outside the requested cleanup and were preserved.
+4. Keep the v2 branch and deployment/test documentation current; complete review before main-domain promotion.
 
 ## Planned or deliberately deferred
 
@@ -42,3 +42,9 @@ npm run check passes. npm test passes both integration tests: full account/task/
 - Complete hosted mobile/session/reconnection testing and resolve any failures before a customer release.
 - Finish OAuth cleanup only after identifying a specific unused client and confirming it can be removed.
 - Promote v2 to the main customer URL only after the user approves the tested release. Version 1 stays live on main until then.
+
+## Latest working preview
+
+https://tasky-v2-testing-60s38wcw3-sukhpreet-singhs-projects-46c3ca60.vercel.app
+
+Vercel deployment protection remains enabled; the account owner may need to sign in to Vercel. Synthetic preview accounts and one clearly labelled test task were created in the development database for Chrome verification. No real customer or production data was used.

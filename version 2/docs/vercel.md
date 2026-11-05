@@ -12,6 +12,6 @@ Ably delivers live updates using WebSockets. Express persists and authorizes eve
 
 Run npm ci --include=dev, npm run check and npm test in version 2. The lockfile contains Linux as well as Windows native build packages. Run npm run db:prepare against only the intended database when preparing indexes.
 
-A READY preview and hosted account/task posting have been observed. Complete the latest reconnection fix's hosted checks and the Ably/Google interactive tests before calling the app ready for customers. Dodo Payments is deferred until the end by user instruction.
+A READY preview and hosted signup/login, task posting/access, proposal submission, Ably connection and message sending have been observed. The reconnection regression test passes. Complete simultaneous two-session delivery, mobile/idle regression and full Google sign-in testing before calling the app ready for customers. Dodo Payments is deferred until the end by user instruction.
 
 Promotion to the main domain remains a separate, explicit approval step. See progress.md for the detailed current implementation and validation status.
