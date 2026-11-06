@@ -45,3 +45,9 @@ The follow-up request removes the full-screen dialog experience. Planet shells n
 Horizontal trackpad gestures over the globe/orbit rotate it around the vertical axis. Shift plus the mouse wheel also rotates it; vertical gestures retain normal page scrolling and browser zoom gestures are preserved. Both the closed and expanded planet surfaces accept horizontal input. Pointer drag remains supported and crossing the drag threshold suppresses accidental opening even when returning to the starting point.
 
 This supersedes the native modal/focus-containment description above. Application source: 6dcc3e3 on codex/tasky-version-2. Production frontend build passes.
+
+## Planet navigation correction — 6 November
+
+Application commit 8bacafd fixes divergent expanded and orbit selections. The active expanded planet now supplies the chapter highlight and scene counter; selecting Next skill also aligns the underlying orbit position. Back to orbit, Close and Escape return to that same planet. The four name buttons preserve the current mode: expanded selections stay expanded, orbit selections remain in orbit. Next wraps from the fourth planet to the first. This supersedes the earlier statement that selecting a chapter always closes details.
+
+Production build passed. Hosted Chrome verified Next through Development & IT and Writing & research with matching highlighted names and counters, return to Writing in orbit, every name in expanded mode, and fourth-to-first wraparound. No route navigation or production deployment is involved.
