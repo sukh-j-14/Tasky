@@ -42,6 +42,7 @@ function createApp({ connectOnRequest = false } = {}) {
     res.json({ transport: 'websocket' });
   });
   app.get('/api/auth/google/config', require('./controllers/authController').getGoogleConfig);
+  app.get('/api/payments/config', (_req, res) => res.json({ mode: require('./paymentMode').simulationEnabled() ? 'simulation' : 'disabled' }));
   app.post('/api/auth/logout', (req, res) => {
     try {
       const decoded = require('jsonwebtoken').verify(req.cookies.token, process.env.JWT_SECRET);
@@ -79,11 +80,8 @@ function createApp({ connectOnRequest = false } = {}) {
       bucket.openDownloadStream(id).on('error', next).pipe(res);
     } catch (error) { next(error); }
   });
-  if (process.env.ENABLE_PAYMENTS === 'true') {
-    app.use('/api/payments', require('./routes/paymentRoutes'));
-  } else {
-    app.use('/api/payments', (_req, res) => res.status(503).json({ message: 'Payments are not enabled yet' }));
-  }
+  app.use('/api/payments/simulation', require('./routes/simulationRoutes'));
+  app.use('/api/payments', (_req, res) => res.status(503).json({ message: 'Real payments are not enabled. No money can be collected or transferred.' }));
   app.use('/api', (_req, res) => res.status(404).json({ message: 'API route not found' }));
   const uploads = path.join(__dirname, 'uploads');
   if (!process.env.VERCEL) {

@@ -43,7 +43,7 @@ function connectionGlobe() {
 }
 
 // Original procedural artwork: no downloaded models or reference-site assets.
-export default function OrbitScene({ progress }) {
+export default function OrbitScene({ progress, motion }) {
  const host = useRef(null);
  useEffect(() => {
   const container = host.current;
@@ -82,6 +82,10 @@ export default function OrbitScene({ progress }) {
    }
    geometry.setAttribute('color', new THREE.Float32BufferAttribute(faceColors, 3));
    geometry.computeVertexNormals();
+   geometry.userData.original = positions.array.slice();
+   geometry.userData.directions = [];
+   for(let face=0;face<positions.count;face+=3){const center=new THREE.Vector3();for(let j=0;j<3;j++)center.add(new THREE.Vector3().fromBufferAttribute(positions,face+j));geometry.userData.directions.push(center.normalize());}
+   group.userData.expansion = 0;
    group.add(new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ vertexColors: true, metalness: .65, roughness: .33, flatShading: true, side: THREE.DoubleSide })));
    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(1.17, 2), new THREE.MeshStandardMaterial({ color: 0x101719, metalness: .6, roughness: .5 })));
    scene.add(group);
@@ -93,16 +97,18 @@ export default function OrbitScene({ progress }) {
    moon.userData.phase = i * 2.4; orbit.add(moon);
   }
   scene.add(orbit);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.8,.006,6,128),new THREE.MeshBasicMaterial({color:0xbfe7d2,transparent:true,opacity:.2}));
+  ring.rotation.set(1.1,.25,.15);scene.add(ring);
   const points = [];
   for (let i = 0; i < 220; i++) points.push(Math.sin(i * 127.1) * 18, Math.cos(i * 311.7) * 12, -3 - (i % 11));
   const starsGeometry = new THREE.BufferGeometry();
   starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-  scene.add(new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: 0xc2d2e6, size: .015, transparent: true, opacity: .65 })));
+  const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: 0xc2d2e6, size: .015, transparent: true, opacity: .65 }));scene.add(stars);
   const media = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = media.matches, visible = true, frame, active = true, drag = 0, previousX, lastRender = 0;
   const onMotion = event => { reduced = event.matches; };
   const onDown = event => { previousX = event.clientX; };
-  const onMove = event => { if (previousX !== undefined) { drag += (event.clientX - previousX) * .008; previousX = event.clientX; } };
+  const onMove = event => { motion.current.pointerX=event.clientX/window.innerWidth*2-1;motion.current.pointerY=event.clientY/window.innerHeight*2-1;if (previousX !== undefined) { drag += (event.clientX - previousX) * .008; previousX = event.clientX; } };
   const onUp = () => { previousX = undefined; };
   const onLoss = () => { active = false; container.classList.remove('webgl-ready'); };
   renderer.domElement.addEventListener('webglcontextlost', onLoss);
@@ -124,18 +130,40 @@ export default function OrbitScene({ progress }) {
    lastRender = time;
    const p = progress.current * 3;
    const mobile = container.clientWidth < 760;
+   const input = motion.current, selected = input.openIndex;
+   const opened = selected !== null;
+   const target = new THREE.Vector3();
    objects.forEach((object, index) => {
     const distance = index - p;
-    object.visible = !mobile || Math.abs(distance) < .9;
-    object.position.set(mobile ? .1 : 1.55, -distance * 3.5 + (mobile ? -.65 : 0), -Math.abs(distance) * 1.7);
-    const scale = Math.max(.25, 1 - Math.abs(distance) * .16);
+    object.visible = opened ? index === selected : !mobile || Math.abs(distance) < .9;
+    target.set(opened ? mobile ? .1 : -1.8 : mobile ? .1 : 1.55, opened ? mobile ? 1.5 : .05 : -distance * 3.5 + (mobile ? -.65 : 0), opened ? 0 : -Math.abs(distance) * 1.7);
+    if(reduced)object.position.copy(target);else object.position.lerp(target,.16);
+    const scale = opened ? mobile ? .76 : 1 : Math.max(.25, 1 - Math.abs(distance) * .16);
     object.scale.setScalar(scale);
-    object.rotation.set(index === 3 ? -.12 : .2 + p * .1, drag + (index === 3 ? -.35 : p * .9) + (reduced ? 0 : time * .00008), index === 3 ? .12 : .15 + index * .3);
+    object.rotation.set((index === 3 ? -.12 : .2 + p * .1) + input.tilt, drag + input.drag + (index === 3 ? -.35 : p * .9) + (reduced ? 0 : time * .00008), index === 3 ? .12 : .15 + index * .3);
+    const shell = object.children[0];
+    if(shell.geometry.userData.original){
+     const destination = selected === index ? 1 : input.hover && Math.abs(distance)<.5 ? .1 : 0;
+     object.userData.expansion = reduced ? destination : object.userData.expansion + (destination-object.userData.expansion)*.12;
+     const expansion=object.userData.expansion, positions=shell.geometry.attributes.position, original=shell.geometry.userData.original;
+     for(let face=0;face<positions.count;face+=3){
+      const direction=shell.geometry.userData.directions[face/3], spread=expansion*(.55+(face%11)*.04);
+      for(let j=0;j<3;j++){const k=(face+j)*3;positions.setXYZ(face+j,original[k]+direction.x*spread,original[k+1]+direction.y*spread,original[k+2]+direction.z*spread);}
+     }
+     positions.needsUpdate=true;
+     const core=object.children[1];core.scale.setScalar(1-expansion*.55);core.material.emissive.setHex(colors[index]);core.material.emissiveIntensity=expansion*.7;
+    }
    });
-   orbit.children.forEach((moon, index) => {
-    const angle = moon.userData.phase + p * .8 + (reduced ? 0 : time * .000035);
-    moon.position.set((mobile ? .1 : 1.55) + Math.cos(angle) * 2.4, Math.sin(angle) * 1.8 - (mobile ? .6 : 0), Math.sin(angle) * 1.3);
+   const orbitX=opened ? mobile ? .1 : -1.8 : mobile ? .1 : 1.55;
+   orbit.children.forEach((moon) => {
+    const angle=moon.userData.phase+p*.8+(reduced?0:time*.000035);
+    moon.position.set(orbitX+Math.cos(angle)*2.4,Math.sin(angle)*1.8+(opened&&mobile?1.5:mobile?-.6:0),Math.sin(angle)*1.3);
    });
+   ring.position.set(orbitX,opened&&mobile?1.5:mobile?-.65:0,0);ring.rotation.z=p*.3;
+   const accent=new THREE.Color(colors[opened?selected:Math.min(3,Math.round(p))]);ring.material.color.lerp(accent,.1);
+   const shiftX=reduced?0:input.pointerX*.12,shiftY=reduced?0:-input.pointerY*.08;
+   camera.position.x+=(shiftX-camera.position.x)*.08;camera.position.y+=(shiftY-camera.position.y)*.08;camera.lookAt(0,0,0);
+   stars.rotation.y=reduced?0:input.pointerX*.025;stars.rotation.x=reduced?0:input.pointerY*.012;
    renderer.render(scene, camera);
   }
   frame = requestAnimationFrame(render);
@@ -148,6 +176,6 @@ export default function OrbitScene({ progress }) {
    scene.traverse(object => { object.geometry?.dispose(); if (object.material) object.material.dispose(); });
    renderer.dispose(); renderer.domElement.remove(); container.classList.remove('webgl-ready');
   };
- }, [progress]);
+ }, [progress, motion]);
  return <div className="orbit-canvas" ref={host} aria-hidden="true"><div className="orbit-fallback"/></div>;
 }

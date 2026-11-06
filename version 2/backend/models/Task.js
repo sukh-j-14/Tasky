@@ -199,6 +199,8 @@ const taskSchema = new mongoose.Schema({
   // Completion
   completedAt: Date,
   deliveredAt: Date,
+  deliveryNote: { type: String, maxlength: 2000 },
+  simulationVersion: { type: Number, default: 0 },
   acceptedAt: Date,
   
   // Dispute Information

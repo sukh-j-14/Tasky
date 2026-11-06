@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, identity, money } from '../api';
 import { Negotiation } from './Negotiation';
+import { ProjectPayment } from './ProjectPayment';
 import { useAuth } from '../auth';
 import { Field, FormStatus, ResourceState, taskCategories, useResource } from './shared';
 
@@ -37,6 +38,7 @@ export function TaskEditor({ edit = false }) {
 
 export function TaskDetail() {
   const { taskId } = useParams(), resource = useResource(`/tasks/${taskId}`);
+  const paymentConfig = useResource('/payments/config');
   const { user } = useAuth(); const navigate = useNavigate();
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
   const task = resource.data, owner = task && identity(task.clientId) === identity(user);
@@ -48,12 +50,7 @@ export function TaskDetail() {
       navigate(`/tasks/${taskId}/bids`);
     } catch (err) { setError(err.message); } finally { setBusy(false); }
   }
-  async function complete() {
-    setBusy(true); setError('');
-    try { await api(`/tasks/${taskId}/complete`, { method: 'POST' }); resource.reload(); }
-    catch (err) { setError(err.message); } finally { setBusy(false); }
-  }
-  return <section className="section workspace"><Link className="text-link" to="/tasks">← Explore tasks</Link><ResourceState resource={resource}>{task && <><div className="section-heading detail-heading"><div><p className="eyebrow">{task.category} / {task.status}</p><h1>{task.title}</h1><p className="muted">Posted by {task.clientId?.firstName} {task.clientId?.lastName}</p></div><div className="budget-display">{money(task.budget)}<small>Fixed project budget</small></div></div><div className="detail-layout"><article className="panel"><h2 className="workspace-heading">The brief</h2><p className="preserve-lines">{task.description}</p><div className="chips">{task.skills?.map(skill => <span className="status-tag" key={skill}>{skill}</span>)}</div><p className="muted">Deadline: {new Date(task.deadline).toLocaleDateString()}</p>{task.attachments?.map(file => <a className="text-link" href={file.url} key={file.filename}>{file.originalName}</a>)}</article><aside className="panel"><h3>{owner ? 'Manage your project' : 'Make your next move'}</h3>{owner ? <div className="action-stack"><Link className="button" to={`/tasks/${taskId}/bids`}>Review proposals</Link>{task.status === 'open' && <Link className="text-link" to={`/tasks/${taskId}/edit`}>Edit brief</Link>}{task.status === 'in-progress' && <button className="button" disabled={busy} onClick={complete}>Mark completed</button>}<p className="muted">Payments are not enabled. Completing a task does not transfer money.</p></div> : !user ? <Link className="button" to="/login" state={{ from: `/tasks/${taskId}` }}>Log in to propose</Link> : task.status !== 'open' ? <p>This task is {task.status}.</p> : <form className="form-grid" onSubmit={propose}><Field label="Your price (₹)" type="number" name="amount" min="1" required/><Field label="Delivery time (days)" type="number" name="proposedTimeline" min="1" max="365" required/><Field label="Your proposal" type="textarea" name="message" rows={5} maxLength={1000} required/><button className="button" disabled={busy}>{busy ? 'Sending…' : 'Send proposal'}</button><Link className="text-link" to={`/tasks/${taskId}/bids`}>View your proposal</Link></form>}<FormStatus error={error}/></aside></div></>}</ResourceState></section>;
+  return <section className="section workspace"><Link className="text-link" to="/tasks">← Explore tasks</Link><ResourceState resource={resource}>{task && <><div className="section-heading detail-heading"><div><p className="eyebrow">{task.category} / {task.status}</p><h1>{task.title}</h1><p className="muted">Posted by {task.clientId?.firstName} {task.clientId?.lastName}</p></div><div className="budget-display">{money(task.budget)}<small>Fixed project budget</small></div></div><div className="detail-layout"><article className="panel"><h2 className="workspace-heading">The brief</h2><p className="preserve-lines">{task.description}</p><div className="chips">{task.skills?.map(skill => <span className="status-tag" key={skill}>{skill}</span>)}</div><p className="muted">Deadline: {new Date(task.deadline).toLocaleDateString()}</p>{task.attachments?.map(file => <a className="text-link" href={file.url} key={file.filename}>{file.originalName}</a>)}</article><aside className="panel"><h3>{owner ? 'Manage your project' : 'Make your next move'}</h3>{owner ? <div className="action-stack"><Link className="button" to={`/tasks/${taskId}/bids`}>Review proposals</Link>{task.status === 'open' && <Link className="text-link" to={`/tasks/${taskId}/edit`}>Edit brief</Link>}</div> : !user ? <Link className="button" to="/login" state={{ from: `/tasks/${taskId}` }}>Log in to propose</Link> : task.status !== 'open' ? <p>This task is {task.status}.</p> : <form className="form-grid" onSubmit={propose}><Field label="Your price (₹)" type="number" name="amount" min="1" required/><Field label="Delivery time (days)" type="number" name="proposedTimeline" min="1" max="365" required/><Field label="Your proposal" type="textarea" name="message" rows={5} maxLength={1000} required/><button className="button" disabled={busy}>{busy ? 'Sending…' : 'Send proposal'}</button><Link className="text-link" to={`/tasks/${taskId}/bids`}>View your proposal</Link></form>}<FormStatus error={error}/></aside></div>{paymentConfig.data && user && [task.clientId,task.selectedFreelancerId].some(id => identity(id) === identity(user)) && task.selectedBidId && <ProjectPayment task={task} owner={owner} simulation={paymentConfig.data?.mode === 'simulation'} onChanged={resource.reload}/>}</>}</ResourceState></section>;
 }
 
 export function TaskBids() {

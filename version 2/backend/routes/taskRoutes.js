@@ -361,7 +361,7 @@ router.put('/:id', authMiddleware.authenticateUser, async (req, res) => {
   try {
     const updates = pickTaskFields(req.body);
     const updatedTask = await Task.findOneAndUpdate(
-      { _id: req.params.id, clientId: req.user._id },
+      { _id: req.params.id, clientId: req.user._id, status: 'open' },
       updates,
       { new: true, runValidators: true }
     );
@@ -375,100 +375,9 @@ router.put('/:id', authMiddleware.authenticateUser, async (req, res) => {
   }
 });
 
-// Complete task and release payment
-router.post('/:id/complete', authMiddleware.authenticateUser, async (req, res) => {
-  try {
-    const taskId = req.params.id;
-    const userId = req.user._id;
-
-    const task = await Task.findById(taskId).populate('paymentId');
-    if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
-    }
-
-    // Check if user is the task owner
-    if (task.clientId.toString() !== userId.toString()) {
-      return res.status(403).json({ message: 'Only task owner can complete tasks' });
-    }
-
-    // Check if task is in progress
-    if (task.status !== 'in-progress') {
-      return res.status(400).json({ message: 'Task is not in progress' });
-    }
-
-    // Update task status
-    task.status = 'completed';
-    task.completedAt = new Date();
-    await task.save();
-
-    const acceptedBid = await Bid.findOne({ taskId: task._id, status: 'accepted' });
-    if (acceptedBid) {
-      acceptedBid.completed = true;
-      acceptedBid.completedAt = task.completedAt;
-      await acceptedBid.save();
-
-      const conversation = await Conversation.findOne({
-        taskId: task._id,
-        bidId: acceptedBid._id
-      });
-
-      if (conversation) {
-        const completionMessage = await Message.create({
-          conversationId: conversation._id,
-          senderId: userId,
-          receiverId: acceptedBid.bidderId,
-          message: `The task "${task.title}" has been marked as completed.`,
-          messageType: 'system',
-          isSystemMessage: true,
-          systemMessageType: 'task_completed'
-        });
-        conversation.lastMessage = completionMessage._id;
-        conversation.lastMessageAt = completionMessage.createdAt;
-        await conversation.save();
-      }
-    }
-
-    if (task.selectedFreelancerId) {
-      await require('../models/User').findByIdAndUpdate(task.selectedFreelancerId, {
-        $inc: { tasksCompleted: 1 }
-      });
-    }
-
-    // Release payment from escrow
-    if (task.paymentId) {
-      const Payment = require('../models/Payment');
-      const payment = await Payment.findById(task.paymentId);
-      
-      if (payment && payment.status === 'escrowed') {
-        // Update payment status
-        payment.status = 'completed';
-        payment.completedAt = new Date();
-        await payment.save();
-
-        // Transfer money to freelancer (simulate)
-        const User = require('../models/User');
-        await User.findByIdAndUpdate(payment.freelancerId, {
-          $inc: { walletBalance: payment.amount }
-        });
-
-        // Add platform fee to company wallet (simulate)
-        // In a real app, this would go to a company account
-        console.log(`Platform fee of ₹${payment.platformFee} earned from task ${taskId}`);
-      }
-    }
-
-    res.json({ 
-      message: task.paymentId
-        ? 'Task completed successfully. Payment has been released to the freelancer.'
-        : 'Task completed successfully.',
-      task 
-    });
-
-  } catch (error) {
-    console.error('Error completing task:', error);
-    res.status(500).json({ message: 'Failed to complete task' });
-  }
-});
+// Delivery and approval are transactional; real payment routes remain disabled.
+router.post('/:id/deliver', authMiddleware.authenticateUser, require('../services/projectWorkflow').deliver);
+router.post('/:id/complete', authMiddleware.authenticateUser, require('../services/projectWorkflow').complete);
 
 // Delete task
 router.delete('/:id', authMiddleware.authenticateUser, async (req, res) => {

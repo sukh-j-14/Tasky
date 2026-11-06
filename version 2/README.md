@@ -14,3 +14,5 @@ npm run check builds React and checks backend entrypoints. npm test verifies the
 The separate Vercel project builds from the repository ROOT using root vercel.json and root api/index.js. These adapters preserve the version 2 folder name while avoiding spaces in Vercel function names. Keep version 1's main deployment and domain unchanged until v2 is tested and explicitly approved for promotion.
 
 Dodo Payments is intentionally deferred until the final stage. Live payments, escrow and payouts are disabled. See docs/progress.md for what is implemented versus what has been verified on the hosted preview.
+
+Payment simulation is available for development and Vercel preview only with PAYMENT_SIMULATION=true. The client can simulate declined/successful funding of the accepted proposal; the selected freelancer submits delivery; the client approves and releases a test ledger entry atomically. No real funds or wallet balances change. Real payment endpoints stay disabled, and production rejects simulation mode. See docs/payment-simulation.md.

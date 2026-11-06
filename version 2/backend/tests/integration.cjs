@@ -93,6 +93,8 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: worker.cookie, status: 403 });
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: client.cookie });
     const inProgress = await request(`/tasks/${taskId}`); assert.equal(inProgress.data.status, 'in-progress');
+    await request(`/tasks/${taskId}/complete`, { method: 'POST', cookie: client.cookie, status:409 });
+    await request(`/tasks/${taskId}/deliver`, { method:'POST',cookie:worker.cookie,body:{message:'Completed project, ready for review.'} });
     await request(`/tasks/${taskId}/complete`, { method: 'POST', cookie: client.cookie });
     assert.equal((await request(`/tasks/${taskId}`)).data.status, 'completed');
     await request('/auth/profile', { method: 'PUT', cookie: worker.cookie, body: { bio: 'Blocked' }, origin: 'https://untrusted.example', status: 403 });

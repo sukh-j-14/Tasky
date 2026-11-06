@@ -2,6 +2,7 @@ import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './home.css';
 import { ProcessArt } from './ProcessArt';
+import { OrbitDetail, OrbitCursor, useOrbitControls } from './OrbitDetail';
 
 const OrbitScene = lazy(() => import('./OrbitScene'));
 const chapters = [
@@ -14,6 +15,7 @@ const skills = [['Development & IT', 'coding', '⌘', 'Websites, apps & technica
 
 export function Home() {
  const runway = useRef(null), progress = useRef(0);
+ const controls = useOrbitControls();
  const [chapter, setChapter] = useState(0), [paused, setPaused] = useState(false);
  useEffect(() => {
   let frame;
@@ -37,13 +39,14 @@ export function Home() {
   window.scrollTo({ top: window.scrollY + runway.current.getBoundingClientRect().top + index / 3 * (runway.current.offsetHeight - runway.current.firstElementChild.offsetHeight), behavior: reduced ? 'instant' : 'smooth' });
  }
  const current = chapters[chapter];
- return <div className="home-page"><section className="orbit-runway" ref={runway} aria-label="Explore Tasky’s world of work"><div className="orbit-stage">
-  {!paused && <Suspense fallback={<div className="orbit-canvas"><div className="orbit-fallback"/></div>}><OrbitScene progress={progress}/></Suspense>}
+ return <div className="home-page"><section className="orbit-runway" ref={runway} aria-label="Explore Tasky’s world of work"><div className="orbit-stage" data-chapter={controls.selected ?? chapter} data-open={controls.selected !== null}>
+  {!paused && <Suspense fallback={<div className="orbit-canvas"><div className="orbit-fallback"/></div>}><OrbitScene progress={progress} motion={controls.motion}/></Suspense>}
   {paused && <div className="orbit-canvas"><div className="orbit-fallback"/></div>}
-  <div className="space-horizon"/><div className="scene-copy" key={chapter}><p className="scene-kicker">{current.label}</p><h1>{current.title}</h1><p>{current.description}</p><Link className="scene-link" to={current.link}>{current.action}<span aria-hidden="true">↗</span></Link></div>
+  <div className="orbit-atmosphere"/><div className="space-horizon"/><button className="orbit-target" {...controls.dragProps} onClick={() => controls.activate(chapter)} aria-label={`Explore ${current.name} planet`}><span className="sr-only">Click to open, drag to rotate, or use arrow keys</span></button><OrbitCursor/><div className="scene-copy" key={chapter}><p className="scene-kicker">{current.label}</p><h1>{current.title}</h1><p>{current.description}</p><Link className="scene-link" to={current.link}>{current.action}<span aria-hidden="true">↗</span></Link></div>
   <span className={`planet-symbol ${chapter === 3 ? 'globe-symbol' : ''}`} aria-hidden="true">{current.symbol}</span><span className="scene-side">THE TASKY CONSTELLATION</span>
-  <div className="scene-bottom"><span className="scroll-hint">↓ Scroll to discover <span>· Drag to rotate</span></span><div className="scene-controls"><a href="#skills">Explore skills <span aria-hidden="true">↗</span></a><button onClick={() => setPaused(value => !value)} aria-pressed={paused} aria-label="Pause animated artwork">{paused ? 'Play' : 'Pause'}</button></div><span className="scene-count">0{chapter + 1}<span> / 04</span></span></div>
+  <div className="scene-bottom"><span className="scroll-hint">↓ Scroll to discover <span>· Drag to rotate · Click to open</span></span><div className="scene-controls"><a href="#skills">Explore skills <span aria-hidden="true">↗</span></a><button onClick={() => setPaused(value => !value)} aria-pressed={paused} aria-label="Pause animated artwork">{paused ? 'Play' : 'Pause'}</button></div><span className="scene-count">0{chapter + 1}<span> / 04</span></span></div>
   <div className="chapter-nav" aria-label="Scene chapters">{chapters.map((item, index) => <button key={item.name} aria-label={`Show ${item.name}`} aria-pressed={chapter === index} onClick={() => choose(index)}><span>0{index + 1}</span>{item.name}</button>)}</div>
+  <OrbitDetail controls={controls} chapters={chapters}/>
  </div></section>
  <section className="connection-section home-section" data-reveal><p className="scene-kicker">ONE CONNECTION. NEW POSSIBILITIES.</p><div className="editorial-heading"><h2>From your idea.<br/><span>To someone’s next big thing.</span></h2><div><p>Good work brings people together. Tasky connects the ambition behind a project with the skills to move it forward.</p><Link className="button" to="/post-task">Build your next thing ↗</Link></div></div><div className="connection-line"><span>Imagine</span><i/><span>Connect</span><i/><span>Create</span><i/><span>Deliver</span></div></section>
  <section className="home-section skill-index" id="skills"><div className="section-caption"><span>A CONSTELLATION OF SKILLS</span><span>01 — 06</span></div><div className="editorial-heading" data-reveal><h2>Find your kind<br/>of brilliant.</h2><p>Different disciplines.<br/>A world of work worth doing.</p></div><div>{skills.map(([name, query, symbol, description], index) => <Link key={name} className="skill-row" to={`/tasks?search=${query}`} data-reveal><span className="skill-number">0{index + 1}</span><span className="skill-symbol" aria-hidden="true">{symbol}</span><h3>{name}</h3><p>{description}</p><span className="row-arrow" aria-hidden="true">↗</span></Link>)}</div><form className="home-search" action="/tasks"><label htmlFor="home-task-search">Your next opportunity is out there.</label><div><input id="home-task-search" name="search" placeholder="Search tasks, skills or ideas"/><button className="button" type="submit">Find work ↗</button></div></form></section>

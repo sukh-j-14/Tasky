@@ -42,3 +42,5 @@ textarea:focus-visible,select:focus-visible{outline:3px solid #538820;outline-of
 [data-theme=dark] .skip-link{background:#19291f;color:#edf3e8}
 [data-theme=dark] :is(a,button,input,textarea,select):focus-visible{outline-color:#b3ec63}
 @media(max-width:420px){.header-actions{gap:9px}.theme-toggle{padding:7px}.theme-toggle>span:last-child{display:none}}
+
+.project-payment{margin-top:26px}.project-payment .workspace-heading{margin-top:0}.simulation-notice{padding:16px;border:1px dashed currentColor;font-size:13px;background:#d3e8dc22}.payment-summary{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:25px 0 8px}.payment-summary>strong{font-size:30px}.delivery-note{padding:20px 0;border-top:1px solid var(--border);margin-top:25px}.simulation-history{margin-top:25px;font-size:12px;color:var(--muted)}.simulation-history summary{cursor:pointer}.simulation-history li{margin:8px 0}.project-payment .form-grid{margin-top:25px}
