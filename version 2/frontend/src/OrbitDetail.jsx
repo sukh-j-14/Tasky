@@ -90,6 +90,6 @@ export function OrbitDetail({ controls, chapters }) {
    <h2 id="orbit-detail-title">{item.name}</h2><p>{item.description}</p>
    <Link className="button" to={item.link} onClick={close}>{item.action} ↗</Link>
    <div className="orbit-detail-bottom"><button onClick={close}>← Back to orbit</button><button onClick={() => select(((selected || 0) + 1) % chapters.length)}>Next skill →</button></div>
-  </div><p className="detail-caption">0{(selected || 0) + 1} / {item.name}<small>DRAG TO ROTATE · USE ARROW KEYS · ESC TO CLOSE</small></p><OrbitCursor expanded/>
+  </div><p className="detail-caption">0{(selected || 0) + 1} / {item.name}<small>DRAG TO ROTATE · USE ARROW KEYS · ESC TO CLOSE</small></p>
  </section>;
 }

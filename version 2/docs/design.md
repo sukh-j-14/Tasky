@@ -37,3 +37,11 @@ A deeper Chrome inspection covered reference planet opening, separated shell pie
 A native dialog provides focus containment, Escape closing and focus restoration. Drag distance suppresses accidental click opening; arrow keys rotate the scene. Reduced motion retains normal cursor behavior. Mobile details sit beneath the artwork; the hosted 390×844 check measured page and dialog at 390 px without horizontal overflow. Desktop opening, mobile Next navigation, keyboard activation, Escape and dragging without opening passed on the published preview.
 
 The final application build and four integration tests pass. See progress.md for hosted workflow and Google/WebSocket verification. Hover was inspected through available pointer interactions; no pixel-identical reproduction or exhaustive cross-device animation claim is made.
+
+## Inline planet revision — 6 November
+
+The follow-up request removes the full-screen dialog experience. Planet shells now expand inside the existing sticky homepage scene. Header navigation, chapter controls, and normal page scrolling remain available; no route, new page, backdrop, or body-scroll lock is opened. The details are an inline section with Close/Next controls. Escape returns focus to the original trigger. Choosing a scene chapter closes the details.
+
+Horizontal trackpad gestures over the globe/orbit rotate it around the vertical axis. Shift plus the mouse wheel also rotates it; vertical gestures retain normal page scrolling and browser zoom gestures are preserved. Both the closed and expanded planet surfaces accept horizontal input. Pointer drag remains supported and crossing the drag threshold suppresses accidental opening even when returning to the starting point.
+
+This supersedes the native modal/focus-containment description above. Application source: 6dcc3e3 on codex/tasky-version-2. Production frontend build passes.
