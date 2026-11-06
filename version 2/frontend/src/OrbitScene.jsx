@@ -105,7 +105,7 @@ export default function OrbitScene({ progress, motion }) {
   for (let i = 0; i < 720; i++) {
    const depth = scatter(i * 3 + 1) * 10;
    points.push((scatter(i * 3 + 2) - .5) * (20 + depth), (scatter(i * 3 + 3) - .5) * (13 + depth * .6), -3 - depth);
-   sizes.push(.9 + Math.pow(scatter(i + 2000), 3) * 1.6);
+   sizes.push(1.25 + Math.pow(scatter(i + 2000), 3) * 1.9);
    phases.push(scatter(i + 4000) * Math.PI * 2);
   }
   const starsGeometry = new THREE.BufferGeometry();
@@ -122,7 +122,7 @@ export default function OrbitScene({ progress, motion }) {
     uniform float pixelRatio;
     varying float brightness;
     void main() {
-     brightness = .48 + .24 * sin(time * .55 + phase);
+     brightness = .8 + .18 * sin(time * .55 + phase);
      gl_PointSize = starSize * pixelRatio;
      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
