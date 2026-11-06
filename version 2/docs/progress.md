@@ -43,9 +43,11 @@ npm run check passes. npm test passes both integration tests: full account/task/
 - Finish OAuth cleanup only after identifying a specific unused client and confirming it can be removed.
 - Promote v2 to the main customer URL only after the user approves the tested release. Version 1 stays live on main until then.
 
-## Latest working preview
+## Latest preview
 
-https://tasky-v2-testing-7v68dxtv3-sukhpreet-singhs-projects-46c3ca60.vercel.app
+https://tasky-v2-testing-f5h5fk2lx-sukhpreet-singhs-projects-46c3ca60.vercel.app
+
+Source commit: d87a7d7. Deployment: dpl_4GcGvP5GViNQFXijTWxFpLs7EZaF.
 
 Vercel deployment protection remains enabled; the account owner may need to sign in to Vercel. Synthetic preview accounts and one clearly labelled test task were created in the development database for Chrome verification. No real customer or production data was used.
 
