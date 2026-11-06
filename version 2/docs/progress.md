@@ -65,3 +65,9 @@ Full Hamol homepage inspected in Chrome, including scroll scenes and all lower s
 - Rechecked the globe chapter at 390×844 with no horizontal overflow; inactive planets are suppressed on mobile to protect headline legibility.
 
 Still pending before release: full Google OAuth origin/consent verification; simultaneous independent-session hosted delivery and prolonged reconnect testing; Dodo Payments integration when scheduled at the end; final release approval. No production domain change or OAuth client deletion was performed.
+
+## Google origin and final viewport follow-up — 6 November
+
+With action-time approval, saved the f5h5fk2lx preview origin in the existing Tasky Production Google OAuth client, preserving https://tasky-nine-gamma.vercel.app. Reopened the client details and confirmed both persisted. The Google button opens the provider account chooser; account selection remained on Google's Loading state, with no captured browser error. Full consent/callback verification is pending user completion in Chrome. No OAuth client was deleted.
+
+The final viewport follow-up measures the actual sticky scene height for both progress and chapter destinations, fixing clipping when a short viewport or temporary browser UI changes the window height. Browser verified the final scene after this change; production build passes. This follow-up is on the v2 branch; the current hosted preview remains the d87a7d7 deployment listed above. Future preview origin handling should use a stable testing hostname to avoid a Google configuration change per deployment.

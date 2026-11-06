@@ -20,7 +20,7 @@ export function Home() {
   function update() {
    frame = undefined;
    const bounds = runway.current.getBoundingClientRect();
-   const p = Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height - window.innerHeight)));
+   const p = Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height - runway.current.firstElementChild.getBoundingClientRect().height)));
    progress.current = p;
    setChapter(Math.min(3, Math.floor(p * 3 + .45)));
    runway.current.style.setProperty('--journey', p);
@@ -34,7 +34,7 @@ export function Home() {
  }, []);
  function choose(index) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  window.scrollTo({ top: window.scrollY + runway.current.getBoundingClientRect().top + index / 3 * (runway.current.offsetHeight - window.innerHeight), behavior: reduced ? 'instant' : 'smooth' });
+  window.scrollTo({ top: window.scrollY + runway.current.getBoundingClientRect().top + index / 3 * (runway.current.offsetHeight - runway.current.firstElementChild.offsetHeight), behavior: reduced ? 'instant' : 'smooth' });
  }
  const current = chapters[chapter];
  return <div className="home-page"><section className="orbit-runway" ref={runway} aria-label="Explore Tasky’s world of work"><div className="orbit-stage">
