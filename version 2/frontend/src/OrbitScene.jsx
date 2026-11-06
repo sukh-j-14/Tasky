@@ -99,11 +99,44 @@ export default function OrbitScene({ progress, motion }) {
   scene.add(orbit);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.8,.006,6,128),new THREE.MeshBasicMaterial({color:0xbfe7d2,transparent:true,opacity:.2}));
   ring.rotation.set(1.1,.25,.15);scene.add(ring);
-  const points = [];
-  for (let i = 0; i < 220; i++) points.push(Math.sin(i * 127.1) * 18, Math.cos(i * 311.7) * 12, -3 - (i % 11));
+  const points = [], sizes = [], phases = [];
+  // Deterministic scatter keeps the galaxy stable between visits and resizes.
+  const scatter = seed => { const value = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
+  for (let i = 0; i < 720; i++) {
+   const depth = scatter(i * 3 + 1) * 10;
+   points.push((scatter(i * 3 + 2) - .5) * (20 + depth), (scatter(i * 3 + 3) - .5) * (13 + depth * .6), -3 - depth);
+   sizes.push(.9 + Math.pow(scatter(i + 2000), 3) * 1.6);
+   phases.push(scatter(i + 4000) * Math.PI * 2);
+  }
   const starsGeometry = new THREE.BufferGeometry();
   starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
-  const stars = new THREE.Points(starsGeometry, new THREE.PointsMaterial({ color: 0xc2d2e6, size: .015, transparent: true, opacity: .65 }));scene.add(stars);
+  starsGeometry.setAttribute('starSize', new THREE.Float32BufferAttribute(sizes, 1));
+  starsGeometry.setAttribute('phase', new THREE.Float32BufferAttribute(phases, 1));
+  const starsMaterial = new THREE.ShaderMaterial({
+   transparent: true, depthWrite: false,
+   uniforms: { time: { value: 0 }, pixelRatio: { value: renderer.getPixelRatio() } },
+   vertexShader: `
+    attribute float starSize;
+    attribute float phase;
+    uniform float time;
+    uniform float pixelRatio;
+    varying float brightness;
+    void main() {
+     brightness = .48 + .24 * sin(time * .55 + phase);
+     gl_PointSize = starSize * pixelRatio;
+     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+   `,
+   fragmentShader: `
+    varying float brightness;
+    void main() {
+     float radius = length(gl_PointCoord - vec2(.5));
+     float alpha = (1.0 - smoothstep(.15, .5, radius)) * brightness;
+     gl_FragColor = vec4(vec3(1.0), alpha);
+    }
+   `
+  });
+  const stars = new THREE.Points(starsGeometry, starsMaterial); scene.add(stars);
   const media = window.matchMedia('(prefers-reduced-motion: reduce)');
   let reduced = media.matches, visible = true, frame, active = true, drag = 0, previousX, lastRender = 0;
   const onMotion = event => { reduced = event.matches; };
@@ -163,6 +196,7 @@ export default function OrbitScene({ progress, motion }) {
    const accent=new THREE.Color(colors[opened?selected:Math.min(3,Math.round(p))]);ring.material.color.lerp(accent,.1);
    const shiftX=reduced?0:input.pointerX*.12,shiftY=reduced?0:-input.pointerY*.08;
    camera.position.x+=(shiftX-camera.position.x)*.08;camera.position.y+=(shiftY-camera.position.y)*.08;camera.lookAt(0,0,0);
+   starsMaterial.uniforms.time.value = reduced ? 0 : time * .001;
    stars.rotation.y=reduced?0:input.pointerX*.025;stars.rotation.x=reduced?0:input.pointerY*.012;
    renderer.render(scene, camera);
   }
