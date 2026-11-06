@@ -35,6 +35,7 @@ export function Home() {
   return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); observer.disconnect(); };
  }, []);
  function choose(index) {
+  controls.close();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   window.scrollTo({ top: window.scrollY + runway.current.getBoundingClientRect().top + index / 3 * (runway.current.offsetHeight - runway.current.firstElementChild.offsetHeight), behavior: reduced ? 'instant' : 'smooth' });
  }

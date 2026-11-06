@@ -8,11 +8,27 @@ export function useOrbitControls() {
  const select = useCallback(index => setSelected(index), []);
  const close = useCallback(() => setSelected(null), []);
  useEffect(() => () => document.documentElement.classList.remove('orbit-pointer-active'), []);
+ useEffect(() => {
+  // A native non-passive listener consumes sideways gestures only; vertical
+  // scrolling still advances the homepage normally.
+  const surfaces = document.querySelectorAll('[data-orbit-rotate]');
+  function rotate(event) {
+   if (event.ctrlKey) return;
+   const sideways = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX;
+   if (!sideways || (!event.shiftKey && Math.abs(sideways) <= Math.abs(event.deltaY))) return;
+   event.preventDefault();
+   const pixels = sideways * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerWidth : 1);
+   motion.current.drag += Math.max(-160, Math.min(160, pixels)) * .006;
+  }
+  surfaces.forEach(surface => surface.addEventListener('wheel', rotate, { passive: false }));
+  return () => surfaces.forEach(surface => surface.removeEventListener('wheel', rotate));
+ }, []);
  function hover(value) {
   motion.current.hover = value;
   document.documentElement.classList.toggle('orbit-pointer-active', value);
  }
  const dragProps = {
+  'data-orbit-rotate': true,
   onPointerEnter: () => hover(true),
   onPointerLeave: () => { if (!motion.current.dragging) hover(false); },
   onPointerDown: event => {
@@ -30,7 +46,7 @@ export function useOrbitControls() {
    if (state.dragging) {
     state.drag += (event.clientX - state.lastX) * .008; state.tilt += (event.clientY - state.lastY) * .004;
     state.lastX = event.clientX; state.lastY = event.clientY;
-    state.wasDragged = Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 6;
+    state.wasDragged ||= Math.hypot(event.clientX - state.startX, event.clientY - state.startY) > 6;
    }
   },
   onPointerUp: event => {
@@ -56,19 +72,17 @@ export function OrbitCursor({ expanded = false }) {
  return <span className="orbit-cursor" aria-hidden="true"><span>{expanded ? 'Drag' : 'Explore'} <b>{expanded ? '↔' : '↗'}</b></span></span>;
 }
 export function OrbitDetail({ controls, chapters }) {
- const dialog = useRef(null);
+ const panel = useRef(null);
  const { selected, close, select, dragProps, motion } = controls;
  const open = selected !== null;
  useEffect(() => {
   if (!open) return;
-  const element = dialog.current, previousOverflow = document.body.style.overflow;
-  element.showModal(); document.body.style.overflow = 'hidden';
-  document.documentElement.classList.add('orbit-detail-open');
+  const element = panel.current, previousFocus = document.activeElement;
   element.querySelector('[aria-label="Close skill details"]').focus({preventScroll:true});
-  return () => { element.close(); document.body.style.overflow = previousOverflow; document.documentElement.classList.remove('orbit-pointer-active','orbit-detail-open'); };
+  return () => { previousFocus?.focus({preventScroll:true}); document.documentElement.classList.remove('orbit-pointer-active'); };
  }, [open]);
  const item = chapters[selected || 0];
- return <dialog ref={dialog} className="orbit-detail" data-tone={selected} aria-labelledby="orbit-detail-title" onCancel={close} onClick={event => { if (event.target === event.currentTarget) close(); }}>
+ return <section ref={panel} hidden={!open} className="orbit-detail" data-tone={selected} aria-labelledby="orbit-detail-title" onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); close(); } }}>
   <button className="detail-rotate" {...dragProps} aria-label={`Rotate ${item.name} planet. Drag or use arrow keys.`} onClick={() => { motion.current.wasDragged = false; }}><span className="sr-only">Drag to rotate the opened planet</span></button>
   <div className="orbit-detail-panel">
    <div className="orbit-detail-top"><span>THE TASKY CONSTELLATION</span><button autoFocus onClick={close} aria-label="Close skill details">Close ×</button></div>
@@ -77,5 +91,5 @@ export function OrbitDetail({ controls, chapters }) {
    <Link className="button" to={item.link} onClick={close}>{item.action} ↗</Link>
    <div className="orbit-detail-bottom"><button onClick={close}>← Back to orbit</button><button onClick={() => select(((selected || 0) + 1) % chapters.length)}>Next skill →</button></div>
   </div><p className="detail-caption">0{(selected || 0) + 1} / {item.name}<small>DRAG TO ROTATE · USE ARROW KEYS · ESC TO CLOSE</small></p><OrbitCursor expanded/>
- </dialog>;
+ </section>;
 }
