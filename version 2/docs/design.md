@@ -25,3 +25,7 @@ Stitch is a visual reference, not shipped application code. Its invented escrow,
 Production build and API syntax checks passed. Integration suite passed (two tests). Chrome verified the desktop 3D scene, scroll/chapter copy changes, skill anchor navigation, 390×844 mobile layout without horizontal overflow, both account themes, and preference persistence after reload. Local browser preview has no API server; hosted API acceptance is checked separately.
 
 The artwork is a procedural interpretation of the reference, not its exact WebGL implementation or Earth imagery.
+
+## 6 November refinement
+
+Final chapter now uses an original stylized globe with dotted continental silhouettes and connection arcs. Process cards use thin-line SVG diagrams. Chrome chapter-focus rendering was fixed with non-scrolling clipping and explicit canvas/content layers. Fresh hosted login, dashboard and message persistence checks passed; desktop and 390×844 scene rendering were checked.

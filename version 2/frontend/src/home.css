@@ -11,3 +11,9 @@ h1,h2,h3{font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.0
 
 .header.home-header{backdrop-filter:blur(12px);background:#0c0e1026}.header.home-header-light{color:#171c1c;background:#e9e9e3e6}.home-header-light nav{background:#e9e9e399;border-color:#17201b26}.home-header-light .button{background:#17201b;color:#e9e9e3}.home-header-light .theme-toggle{border-color:#17201b33}.home-header-light .logout{color:#626a68}
 @media(prefers-reduced-motion:reduce){.chapter-nav{display:none}}
+
+.globe-symbol{display:none}.process-art:before{display:none}.process-diagram{width:100%;max-width:300px;height:120px;color:#bfe7d2}.diagram-beacon{animation:beacon 4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes beacon{50%{opacity:.45;transform:scale(.85)}}@media(prefers-reduced-motion:reduce){.diagram-beacon{animation:none}}
+
+.orbit-stage{overflow:clip}
+
+.orbit-canvas{z-index:0}.space-horizon{z-index:1}.scene-copy,.planet-symbol,.scene-side{z-index:2}.scene-bottom,.chapter-nav{z-index:3}

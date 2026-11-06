@@ -45,10 +45,21 @@ npm run check passes. npm test passes both integration tests: full account/task/
 
 ## Latest working preview
 
-https://tasky-v2-testing-60s38wcw3-sukhpreet-singhs-projects-46c3ca60.vercel.app
+https://tasky-v2-testing-7v68dxtv3-sukhpreet-singhs-projects-46c3ca60.vercel.app
 
 Vercel deployment protection remains enabled; the account owner may need to sign in to Vercel. Synthetic preview accounts and one clearly labelled test task were created in the development database for Chrome verification. No real customer or production data was used.
 
 ## Final UI update — 5 November
 
 Full Hamol homepage inspected in Chrome, including scroll scenes and all lower sections. Implemented original Tasky orbital artwork, pinned native-scroll narrative, chapter buttons, drag rotation, pause/reduced-motion/WebGL fallback, dark/light themes, responsive editorial sections and shared application typography. Chrome checked desktop and 390×844 mobile, theme persistence and scene changes. Production build and integration tests passed. See design.md for Stitch provenance and limits.
+
+## Resumed debugging — 6 November
+
+- Fresh production build and both integration tests passed. No failing application test was found.
+- Vercel confirmed deployment dpl_C7KCD8yyKQMiHAMDTAt6xPppTerH READY from commit 37c96c2 on codex/tasky-version-2.
+- Chrome verified hosted email login, dashboard and saved proposal, Ably Live connection, message send, and the same message after a full reload. Only labelled synthetic development accounts and the existing preview task were used.
+- Refined the final orbital chapter into an original stylized dotted globe with connection arcs; added original thin-line process SVGs and subtle reduced-motion-aware beacon animation. Limited 3D rendering to approximately 30 fps and handled pointer cancellation.
+- Fixed a Chrome chapter-focus defect: overflow:hidden let the sticky scene scroll internally, and animated copy could paint behind the canvas. Switched the stage to overflow:clip and explicit canvas/content layers. Chrome confirmed complete final-scene copy and controls remained visible.
+- Rechecked the globe chapter at 390×844 with no horizontal overflow; inactive planets are suppressed on mobile to protect headline legibility.
+
+Still pending before release: full Google OAuth origin/consent verification; simultaneous independent-session hosted delivery and prolonged reconnect testing; Dodo Payments integration when scheduled at the end; final release approval. No production domain change or OAuth client deletion was performed.
