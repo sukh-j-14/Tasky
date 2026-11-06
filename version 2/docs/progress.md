@@ -12,7 +12,7 @@
 - Local WebSocket messaging with authentication, participant checks, retry acknowledgements, idempotent messages, edits and per-user hiding.
 - Hosted Ably adapter: authenticated short-lived subscribe-only tokens scoped to each user; message content is persisted in MongoDB before server-side publishing.
 - Serverless database connection reuse, reconnection after disconnect, database-backed rate limits, public contact-data filtering, origin checks and production environment validation.
-- Google sign-in React UI reuses the existing Tasky Production client. Full interactive sign-in still needs preview-origin verification.
+- Google sign-in reuses the existing Tasky Production client. The approved preview origin is saved, and Chrome verified the complete Google login return to the dashboard and session persistence after a full reload on 6 November.
 
 ## Infrastructure and observed deployment results
 
@@ -27,12 +27,12 @@
 
 ## Test evidence
 
-npm run check passes. npm test passes both integration tests: full account/task/proposal/message lifecycle and cached database reconnection. Additional assertions cover document upload/download authorization, price negotiations, unauthorized message edits, per-user hiding and user-scoped Ably token capabilities. Automated tests use isolated MongoDB replicas. Chrome separately verified hosted Ably connection and message sending. Simultaneous delivery in two independent customer sessions and the full Google OAuth consent round-trip remain to be checked.
+npm run check passes. npm test passes both integration tests: full account/task/proposal/message lifecycle and cached database reconnection. Additional assertions cover document upload/download authorization, price negotiations, unauthorized message edits, per-user hiding and user-scoped Ably token capabilities. Automated tests use isolated MongoDB replicas. Chrome separately verified hosted Ably connection and message sending. Chrome also verified the full Google login return to the dashboard and persisted session after reload. Simultaneous delivery in two independent customer sessions remains to be checked.
 
 ## Current work
 
 1. Finish simultaneous two-session message delivery, mobile and idle/reconnect browser regression testing on the working hosted preview.
-2. Validate Google OAuth authorized origins for the v2 test URL without removing version 1 origins.
+2. Google OAuth verification completed for the f5h5fk2lx preview. Version 1 origin preserved. Use a stable testing hostname for future preview origin management.
 3. OAuth cleanup inventory completed across all five visible projects: RetailPulse has RetailPulse Web — Production; restropilot-ai has Tasky Production (matches the app configuration); Fingenie, Gemini API and ace-cargo have no OAuth clients. No clearly unused OAuth client was found, so no client was deleted. API keys and service accounts were outside the requested cleanup and were preserved.
 4. Keep the v2 branch and deployment/test documentation current; complete review before main-domain promotion.
 
@@ -64,10 +64,14 @@ Full Hamol homepage inspected in Chrome, including scroll scenes and all lower s
 - Fixed a Chrome chapter-focus defect: overflow:hidden let the sticky scene scroll internally, and animated copy could paint behind the canvas. Switched the stage to overflow:clip and explicit canvas/content layers. Chrome confirmed complete final-scene copy and controls remained visible.
 - Rechecked the globe chapter at 390×844 with no horizontal overflow; inactive planets are suppressed on mobile to protect headline legibility.
 
-Still pending before release: full Google OAuth origin/consent verification; simultaneous independent-session hosted delivery and prolonged reconnect testing; Dodo Payments integration when scheduled at the end; final release approval. No production domain change or OAuth client deletion was performed.
+Still pending before release: simultaneous independent-session hosted delivery and prolonged reconnect testing; Dodo Payments integration when scheduled at the end; final release approval. No production domain change or OAuth client deletion was performed.
 
 ## Google origin and final viewport follow-up — 6 November
 
-With action-time approval, saved the f5h5fk2lx preview origin in the existing Tasky Production Google OAuth client, preserving https://tasky-nine-gamma.vercel.app. Reopened the client details and confirmed both persisted. The Google button opens the provider account chooser; account selection remained on Google's Loading state, with no captured browser error. Full consent/callback verification is pending user completion in Chrome. No OAuth client was deleted.
+With action-time approval, saved the f5h5fk2lx preview origin in the existing Tasky Production Google OAuth client, preserving https://tasky-nine-gamma.vercel.app. Reopened the client details and confirmed both persisted. The Google button opens the provider account chooser; account selection remained on Google's Loading state, with no captured browser error. The initial provider loading issue was subsequently resolved by the user; successful callback and persisted session were verified as recorded below. No OAuth client was deleted.
 
 The final viewport follow-up measures the actual sticky scene height for both progress and chapter destinations, fixing clipping when a short viewport or temporary browser UI changes the window height. Browser verified the final scene after this change; production build passes. This follow-up is on the v2 branch; the current hosted preview remains the d87a7d7 deployment listed above. Future preview origin handling should use a stable testing hostname to avoid a Google configuration change per deployment.
+
+## Google sign-in completed — 6 November
+
+After the user completed the Google provider step, Chrome observed Tasky return to the authenticated dashboard. A full reload initially checked the session and then restored the authenticated dashboard, including account-specific greeting and protected navigation. This verifies the Google identity callback, backend session creation, and session persistence on the approved f5h5fk2lx preview. No credentials or tokens were copied into documentation. No code change was required for this verification.
