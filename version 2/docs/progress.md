@@ -1,77 +1,54 @@
-# Tasky v2 progress — 5 November 2026
+# Tasky v2 progress — 6 November 2026
 
-## Implemented and locally tested
+## Current status
 
-- React JS frontend and Node.js / Express backend in separate frontend and backend folders under version 2.
-- Independent version 1 archive. Main branch and the existing production domain remain unchanged.
-- Final Hamol-inspired UI developed with a new Google Stitch screen: scroll-driven Three.js orbital homepage, changing scene copy, responsive category discovery, original artwork, task search and saved dark/light themes. Prior Upwork/Carnilove directions are superseded.
-- Email/password signup/login, cookie sessions, protected pages and logout. Profile editing and persistent profile photos in MongoDB GridFS.
-- Task posting, details, search, pagination and editing. Supporting-document upload/download with a 3 MB limit and signed-in download authorization.
-- Proposals: submit, review, accept, decline, withdraw, counter-offer and agree on price. Transactional create/accept writes and duplicate-bid protection.
-- Dashboard, task completion and conversation history.
-- Local WebSocket messaging with authentication, participant checks, retry acknowledgements, idempotent messages, edits and per-user hiding.
-- Hosted Ably adapter: authenticated short-lived subscribe-only tokens scoped to each user; message content is persisted in MongoDB before server-side publishing.
-- Serverless database connection reuse, reconnection after disconnect, database-backed rate limits, public contact-data filtering, origin checks and production environment validation.
-- Google sign-in reuses the existing Tasky Production client. The approved preview origin is saved, and Chrome verified the complete Google login return to the dashboard and session persistence after a full reload on 6 November.
+The agreed non-payment v2 scope is implemented and deployed for preview review. Real Dodo Payments integration and promotion to the customer domain remain deferred. Version 1 stays live on main.
 
-## Infrastructure and observed deployment results
+Stable testing address: https://tasky-v2-testing.vercel.app
 
-- GitHub branch: codex/tasky-version-2. The initial implementation was pushed as e9d83e8; the completed UI/realtime/deployment work was pushed as 621fa45.
-- Separate Vercel project: tasky-v2-testing. No main customer domain attached or promoted.
-- Separate MongoDB Atlas development project and free Mumbai cluster: TaskyV2Dev; database tasky_v2. Scoped database account and required indexes are created.
-- User approved 0.0.0.0/0 access ONLY on the isolated v2 Atlas development project for Vercel egress. Production Atlas access was not changed.
-- Ably app Tasky v2 Development created; restricted backend key stored server-side in the Vercel preview environment. No key is included in React.
-- Vercel build issues fixed: development build dependencies, missing Linux Rollup package in the Windows-generated lockfile, and function names containing the space in version 2. A root api/index.js and root vercel.json deploy adapter preserves the requested folder names.
-- The preview at https://tasky-v2-testing-hlsuivpz3-sukhpreet-singhs-projects-46c3ca60.vercel.app reached READY. API readiness returned database connected. Chrome verified account creation and task posting against Atlas.
-- The Chrome two-account test exposed an idle connection reconnection failure. The fix and regression test pass, and the updated preview successfully handled hosted login, task access, proposal submission, Ably WebSocket connection and message sending.
+Application source: 34f3fbae79e6f258cb4537bd3142148250ec16dc on codex/tasky-version-2.
+Deployment: dpl_BHzMDidwTAq7oTsgmvhW3rW9PSqk (READY, preview environment).
+Canonical deployment: https://tasky-v2-testing-ospivcn95-sukhpreet-singhs-projects-46c3ca60.vercel.app
 
-## Test evidence
+Later documentation/test-tool commits do not change the deployed application. Deployment protection remains enabled; the owner may need to sign in to Vercel.
 
-npm run check passes. npm test passes both integration tests: full account/task/proposal/message lifecycle and cached database reconnection. Additional assertions cover document upload/download authorization, price negotiations, unauthorized message edits, per-user hiding and user-scoped Ably token capabilities. Automated tests use isolated MongoDB replicas. Chrome separately verified hosted Ably connection and message sending. Chrome also verified the full Google login return to the dashboard and persisted session after reload. Simultaneous delivery in two independent customer sessions remains to be checked.
+## Implemented
 
-## Current work
+- Separate React frontend and Node.js/Express backend under version 2; original application archived under version 1. GitHub work remains on codex/tasky-version-2.
+- Final Hamol-inspired design developed with Google Stitch reference work and original Three.js artwork: four scroll-driven orbital chapters, opening planet shells, skill panels, Next/Back controls, drag rotation, pointer cursor and parallax, changing background tint, responsive editorial sections and saved dark/light themes. Pause, reduced-motion handling, keyboard controls, dialog focus management and WebGL fallback are included.
+- Email/password accounts, cookie sessions, protected pages, logout and Google sign-in using the existing Tasky client. Profile editing and profile photos stored in GridFS.
+- Task posting, details, search, pagination and editing; supporting documents with a 3 MB limit and authenticated download authorization.
+- Proposals, acceptance/decline/withdrawal, counter-offers and agreement on price. Transactional acceptance and duplicate-proposal protection.
+- Dashboard, participant conversations and persisted messages. Message retries are idempotent; edit permissions and per-user hiding are enforced.
+- Hosted Ably WebSockets with short-lived user-scoped subscribe-only credentials. Express authorizes and persists messages before publishing. Local development supports authenticated direct WebSockets.
+- Preview payment simulation: declined/successful funding, retries, delivery submission, client approval and simulated release. Agreed prices are authoritative. Transactions prevent duplicate release/completion; wallet balances remain unchanged. Every payment control is labelled as test mode. Actual payment endpoints remain disabled; simulation fails closed in production.
+- Serverless database connection reuse and reconnection, database-backed rate limits, origin validation, public contact-data filtering and production configuration validation.
 
-1. Finish simultaneous two-session message delivery, mobile and idle/reconnect browser regression testing on the working hosted preview.
-2. Google OAuth verification completed for the f5h5fk2lx preview. Version 1 origin preserved. Use a stable testing hostname for future preview origin management.
-3. OAuth cleanup inventory completed across all five visible projects: RetailPulse has RetailPulse Web — Production; restropilot-ai has Tasky Production (matches the app configuration); Fingenie, Gemini API and ace-cargo have no OAuth clients. No clearly unused OAuth client was found, so no client was deleted. API keys and service accounts were outside the requested cleanup and were preserved.
-4. Keep the v2 branch and deployment/test documentation current; complete review before main-domain promotion.
+## Infrastructure
 
-## Planned or deliberately deferred
+Separate tasky-v2-testing Vercel project, isolated Tasky v2 Development Atlas project/free Mumbai cluster TaskyV2Dev/database tasky_v2, scoped database user, and separate Tasky v2 Development Ably app. Server credentials are preview-only and absent from React. Database indexes, including the unique simulated-payment ledger index, are prepared.
 
-- Dodo Payments will be integrated at the end, per the user's instruction. No payment collection, escrow or payouts are currently enabled.
-- Complete hosted mobile/session/reconnection testing and resolve any failures before a customer release.
-- Finish OAuth cleanup only after identifying a specific unused client and confirming it can be removed.
-- Promote v2 to the main customer URL only after the user approves the tested release. Version 1 stays live on main until then.
+The approved development-only all-IP Atlas access supports Vercel outbound connections. Production Atlas and the original production Vercel project were not changed. Root api/index.js and vercel.json adapt the requested folder names for Vercel builds.
 
-## Latest preview
+The approved stable testing origin is saved in the existing Tasky Production Google client, preserving the version 1 origin and the previously approved canonical preview origin. Chrome verified Google callback to the stable-address dashboard and restored authentication after a full reload on 6 November.
 
-https://tasky-v2-testing-f5h5fk2lx-sukhpreet-singhs-projects-46c3ca60.vercel.app
+OAuth cleanup inventory covered all five visible Google projects. RetailPulse and Tasky clients are in use; the remaining three projects have no OAuth clients. No clearly unused client was found, so none was deleted. API keys and service accounts were outside the cleanup request.
 
-Source commit: d87a7d7. Deployment: dpl_4GcGvP5GViNQFXijTWxFpLs7EZaF.
+## Verification completed
 
-Vercel deployment protection remains enabled; the account owner may need to sign in to Vercel. Synthetic preview accounts and one clearly labelled test task were created in the development database for Chrome verification. No real customer or production data was used.
+- npm run check: passed production frontend build and API syntax checks.
+- npm test: 4/4 passed, covering account/project/message lifecycle, database reconnection, production simulation isolation, and simulation permissions/retries/concurrent funding/completion/delivery/release.
+- Hosted Chrome test with independent synthetic client and worker sessions: task posting, proposal, counter-offer, price agreement, acceptance, messages received in both directions without refresh, declined simulation, successful retry, worker delivery, owner approval and completed/released test state.
+- Hosted Ably verification tool: actual WebSocket delivery, explicit recipient disconnect/reconnect, persisted-history catch-up, renewed authentication, live delivery after reconnect, and retry without a duplicate record.
+- Google login and session persistence verified on the stable testing address after the user completed Google's provider step.
+- Desktop and 390×844 mobile planet details, Next navigation, Escape close/focus restoration, keyboard opening, and drag without accidental opening verified. Mobile dialog/page/viewport widths all measured 390 px. Theme persistence and scroll chapter changes were checked during the UI work.
 
-## Final UI update — 5 November
+Synthetic accounts and clearly labelled test records remain in the isolated development database. No real customer funds, production data or real deliverables were used. Explicit reconnect testing is not a prolonged physical-network outage or load test. The lazy-loaded Three.js bundle still produces a size warning; the build succeeds.
 
-Full Hamol homepage inspected in Chrome, including scroll scenes and all lower sections. Implemented original Tasky orbital artwork, pinned native-scroll narrative, chapter buttons, drag rotation, pause/reduced-motion/WebGL fallback, dark/light themes, responsive editorial sections and shared application typography. Chrome checked desktop and 390×844 mobile, theme persistence and scene changes. Production build and integration tests passed. See design.md for Stitch provenance and limits.
+## Remaining work
 
-## Resumed debugging — 6 November
+1. User review of this preview and any requested refinements.
+2. Integrate Dodo Payments at the end, replacing simulation only after real provider setup and payment-specific testing.
+3. Obtain explicit approval before production promotion or replacing the version 1 customer URL. Before that release, provision production configuration and complete a production release review; the development database and simulated payment mode are not a customer payment setup.
 
-- Fresh production build and both integration tests passed. No failing application test was found.
-- Vercel confirmed deployment dpl_C7KCD8yyKQMiHAMDTAt6xPppTerH READY from commit 37c96c2 on codex/tasky-version-2.
-- Chrome verified hosted email login, dashboard and saved proposal, Ably Live connection, message send, and the same message after a full reload. Only labelled synthetic development accounts and the existing preview task were used.
-- Refined the final orbital chapter into an original stylized dotted globe with connection arcs; added original thin-line process SVGs and subtle reduced-motion-aware beacon animation. Limited 3D rendering to approximately 30 fps and handled pointer cancellation.
-- Fixed a Chrome chapter-focus defect: overflow:hidden let the sticky scene scroll internally, and animated copy could paint behind the canvas. Switched the stage to overflow:clip and explicit canvas/content layers. Chrome confirmed complete final-scene copy and controls remained visible.
-- Rechecked the globe chapter at 390×844 with no horizontal overflow; inactive planets are suppressed on mobile to protect headline legibility.
-
-Still pending before release: simultaneous independent-session hosted delivery and prolonged reconnect testing; Dodo Payments integration when scheduled at the end; final release approval. No production domain change or OAuth client deletion was performed.
-
-## Google origin and final viewport follow-up — 6 November
-
-With action-time approval, saved the f5h5fk2lx preview origin in the existing Tasky Production Google OAuth client, preserving https://tasky-nine-gamma.vercel.app. Reopened the client details and confirmed both persisted. The Google button opens the provider account chooser; account selection remained on Google's Loading state, with no captured browser error. The initial provider loading issue was subsequently resolved by the user; successful callback and persisted session were verified as recorded below. No OAuth client was deleted.
-
-The final viewport follow-up measures the actual sticky scene height for both progress and chapter destinations, fixing clipping when a short viewport or temporary browser UI changes the window height. Browser verified the final scene after this change; production build passes. This follow-up is on the v2 branch; the current hosted preview remains the d87a7d7 deployment listed above. Future preview origin handling should use a stable testing hostname to avoid a Google configuration change per deployment.
-
-## Google sign-in completed — 6 November
-
-After the user completed the Google provider step, Chrome observed Tasky return to the authenticated dashboard. A full reload initially checked the session and then restored the authenticated dashboard, including account-specific greeting and protected navigation. This verifies the Google identity callback, backend session creation, and session persistence on the approved f5h5fk2lx preview. No credentials or tokens were copied into documentation. No code change was required for this verification.
+See payment-simulation.md for workflow guarantees, design.md for reference provenance, and release-verification.md for reproducible test details.

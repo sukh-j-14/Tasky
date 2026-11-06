@@ -12,6 +12,8 @@ Ably delivers live updates using WebSockets. Express persists and authorizes eve
 
 Run npm ci --include=dev, npm run check and npm test in version 2. The lockfile contains Linux as well as Windows native build packages. Run npm run db:prepare against only the intended database when preparing indexes.
 
-A READY preview and hosted signup/login, task posting/access, proposal submission, Ably connection and message sending have been observed. The reconnection regression test passes. Complete simultaneous two-session delivery, mobile/idle regression and full Google sign-in testing before calling the app ready for customers. Dodo Payments is deferred until the end by user instruction.
+A READY preview is available at https://tasky-v2-testing.vercel.app. APP_ORIGIN uses this stable address; its Google JavaScript origin is approved and saved. PAYMENT_SIMULATION=true is set only for the preview environment; ENABLE_PAYMENTS remains false. Simulation cannot run in production. The simulated-payment unique index is prepared on the development database.
+
+Hosted two-session messaging, explicit disconnect/reconnect and renewed authentication, the complete simulated delivery/approval workflow, mobile planet details, and Google login/session persistence on the stable address passed. See release-verification.md for evidence and limits. Real Dodo Payments is deferred until the end by user instruction. The preview remains protected and uses development services.
 
 Promotion to the main domain remains a separate, explicit approval step. See progress.md for the detailed current implementation and validation status.

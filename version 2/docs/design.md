@@ -29,3 +29,11 @@ The artwork is a procedural interpretation of the reference, not its exact WebGL
 ## 6 November refinement
 
 Final chapter now uses an original stylized globe with dotted continental silhouettes and connection arcs. Process cards use thin-line SVG diagrams. Chrome chapter-focus rendering was fixed with non-scrolling clipping and explicit canvas/content layers. Fresh hosted login, dashboard and message persistence checks passed; desktop and 390×844 scene rendering were checked.
+
+## Interactive refinement verified — 6 November
+
+A deeper Chrome inspection covered reference planet opening, separated shell pieces, the right-side project panel, next-project transition, rotation while open, cursor feedback during pointer interactions, scene tint and scroll transitions. Tasky implements an original interpretation: eased procedural shell opening, selected planet repositioning, changing background tint, pointer-driven parallax, Explore/Drag cursor, skill details, next/close controls and real task-search destinations. Reference assets were not copied.
+
+A native dialog provides focus containment, Escape closing and focus restoration. Drag distance suppresses accidental click opening; arrow keys rotate the scene. Reduced motion retains normal cursor behavior. Mobile details sit beneath the artwork; the hosted 390×844 check measured page and dialog at 390 px without horizontal overflow. Desktop opening, mobile Next navigation, keyboard activation, Escape and dragging without opening passed on the published preview.
+
+The final application build and four integration tests pass. See progress.md for hosted workflow and Google/WebSocket verification. Hover was inspected through available pointer interactions; no pixel-identical reproduction or exhaustive cross-device animation claim is made.
