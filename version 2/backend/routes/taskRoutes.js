@@ -242,8 +242,8 @@ router.get('/attachments/:fileId', authMiddleware.authenticateUser, async (req, 
   }
 });
 
-// Get all tasks (for public browsing)
-router.get('/', async (req, res) => {
+// Task discovery is available only to signed-in members.
+router.get('/', authMiddleware.authenticateUser, async (req, res) => {
   try {
     const { 
       category, 
@@ -328,7 +328,7 @@ router.get('/posted', authMiddleware.authenticateUser, async (req, res) => {
 });
 
 // Get single task
-router.get('/:id', authMiddleware.optionalAuth, async (req, res) => {
+router.get('/:id', authMiddleware.authenticateUser, async (req, res) => {
   try {
     if (!require('mongoose').isValidObjectId(req.params.id)) {
       return res.status(400).json({ message: 'Invalid task ID' });

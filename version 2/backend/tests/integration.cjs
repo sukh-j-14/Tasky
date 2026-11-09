@@ -50,7 +50,9 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     const documentResponse=await fetch(base+attachment.url,{headers:{Cookie:worker.cookie}});
     assert.equal(documentResponse.status,200); assert.match(await documentResponse.text(),/Test document/);
     assert.equal((await fetch(base+attachment.url)).status,401);
-    const browse = await request('/tasks?search=React'); assert.equal(browse.data.total, 1);
+    await request('/tasks', { status: 401 });
+    await request(`/tasks/${taskId}`, { status: 401 });
+    const browse = await request('/tasks?search=React', { cookie: worker.cookie }); assert.equal(browse.data.total, 1);
     await request(`/tasks/${taskId}`, { cookie: worker.cookie });
     await request(`/tasks/${taskId}`, { cookie: worker.cookie, method: 'PUT', status: 404, body: { title: 'not mine' } });
     const bid = await request('/bids', { method: 'POST', cookie: worker.cookie, status: 201, body: { taskId, amount: 4500, message: 'I can build this.', proposedTimeline: 3 } });
@@ -92,11 +94,11 @@ test('accounts, project lifecycle and authenticated persisted WebSocket messagin
     assert.equal(hiddenHistory.data.messages.some(item=>item._id===messageId),false);
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: worker.cookie, status: 403 });
     await request(`/bids/${bid.data.bid._id}/accept`, { method: 'POST', cookie: client.cookie });
-    const inProgress = await request(`/tasks/${taskId}`); assert.equal(inProgress.data.status, 'in-progress');
+    const inProgress = await request(`/tasks/${taskId}`, { cookie: client.cookie }); assert.equal(inProgress.data.status, 'in-progress');
     await request(`/tasks/${taskId}/complete`, { method: 'POST', cookie: client.cookie, status:409 });
     await request(`/tasks/${taskId}/deliver`, { method:'POST',cookie:worker.cookie,body:{message:'Completed project, ready for review.'} });
     await request(`/tasks/${taskId}/complete`, { method: 'POST', cookie: client.cookie });
-    assert.equal((await request(`/tasks/${taskId}`)).data.status, 'completed');
+    assert.equal((await request(`/tasks/${taskId}`, { cookie: client.cookie })).data.status, 'completed');
     await request('/auth/profile', { method: 'PUT', cookie: worker.cookie, body: { bio: 'Blocked' }, origin: 'https://untrusted.example', status: 403 });
     async function denied(options, expected) {
       await new Promise((resolve, reject) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, identity, money } from '../api';
 import { Negotiation } from './Negotiation';
@@ -19,10 +19,24 @@ export function TaskEditor({ edit = false }) {
   const navigate = useNavigate();
   const [error, setError] = useState(''), [busy, setBusy] = useState(false);
   const task = edit ? existing.data : {};
+ const documentInput = useRef(null);
  const [attachment,setAttachment]=useState(null), [uploading,setUploading]=useState(false);
- async function uploadDocument(event){const file=event.target.files?.[0];if(!file)return;setUploading(true);setError('');try{if(file.size>3*1024*1024)throw new Error('Choose a document under 3 MB.');const body=new FormData();body.set('taskFile',file);const result=await api('/tasks/attachments',{method:'POST',body});setAttachment(result.attachment);}catch(err){setError(err.message);}finally{setUploading(false);}}
+ async function uploadDocument(event) {
+  const input = event.currentTarget, file = input.files?.[0];
+  if (!file) return;
+  setUploading(true); setError(''); setAttachment(null);
+  try {
+   if (file.size > 3 * 1024 * 1024) throw new Error('Choose a document up to 3 MB.');
+   const body = new FormData(); body.set('taskFile', file);
+   const result = await api('/tasks/attachments', { method: 'POST', body });
+   setAttachment(result.attachment);
+  } catch (err) { setError(err.message); input.value = ''; }
+  finally { setUploading(false); }
+ }
   async function submit(event) {
-    event.preventDefault(); setBusy(true); setError('');
+    event.preventDefault();
+    if (busy || uploading) return;
+    setBusy(true); setError('');
     try {
       const body = Object.fromEntries(new FormData(event.currentTarget));
       if (attachment) body.attachments = [attachment];
@@ -33,7 +47,7 @@ export function TaskEditor({ edit = false }) {
       navigate(`/tasks/${result._id}`);
     } catch (err) { setError(err.message); } finally { setBusy(false); }
   }
-  return <section className="section workspace"><p className="eyebrow">GIVE YOUR IDEA A START</p><h1>{edit ? 'Refine your brief.' : 'What are we building?'}</h1><ResourceState resource={existing}>{task && (!edit || identity(task.clientId) === identity(user)) ? <form className="panel form-grid two-columns" key={task._id || 'new'} onSubmit={submit}><div className="full-width"><Field label="Project title" name="title" defaultValue={task.title} required maxLength={200}/><Field label="Project brief" name="description" type="textarea" defaultValue={task.description} required maxLength={2000} rows={6}/></div><label className="field">Category<select name="category" defaultValue={task.category || 'coding'}>{taskCategories.map(value => <option key={value}>{value}</option>)}</select></label><Field label="Fixed project budget (₹)" name="budget" type="number" min="1" step="1" defaultValue={task.budget} required/><Field label="Deadline" name="deadline" type="date" min={new Date(Date.now() + 86400000).toLocaleDateString('en-CA')} defaultValue={task.deadline?.slice(0,10)} required/><Field label="Skills (comma separated)" name="skills" defaultValue={task.skills?.join(', ')}/><div className="full-width">{!edit && <label className="field">Supporting document (up to 3 MB)<input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" disabled={busy || uploading} onChange={uploadDocument}/></label>}{uploading && <p role="status">Uploading document…</p>}{attachment && <p role="status">Attached: {attachment.originalName}</p>}</div><input type="hidden" name="contactMethod" value="email"/><input type="hidden" name="budgetType" value="fixed"/><div className="full-width"><FormStatus error={error}/><button className="button" disabled={busy || uploading}>{busy ? 'Saving…' : edit ? 'Save changes' : 'Publish task'}</button></div></form> : <p role="alert">You can only edit your own tasks.</p>}</ResourceState></section>;
+  return <section className="section workspace"><p className="eyebrow">GIVE YOUR IDEA A START</p><h1>{edit ? 'Refine your brief.' : 'What are we building?'}</h1><ResourceState resource={existing}>{task && (!edit || identity(task.clientId) === identity(user)) ? <form className="panel form-grid two-columns" key={task._id || 'new'} onSubmit={submit}><div className="full-width"><Field label="Project title" name="title" defaultValue={task.title} required maxLength={200}/><Field label="Project brief" name="description" type="textarea" defaultValue={task.description} required maxLength={2000} rows={6}/></div>{!edit && <section className="full-width task-document-upload" aria-labelledby="task-documents-title"><h2 id="task-documents-title" className="workspace-heading">Task documents <small>(optional)</small></h2><p id="task-document-help" className="muted">Attach your brief, instructions, reference material or an example to help people understand the task. Upload one PDF, Word, Excel, JPG or PNG file, up to 3 MB. Signed-in members can download it from your task.</p><label className="field">Upload a task document<input ref={documentInput} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" aria-describedby="task-document-help" disabled={busy || uploading} onChange={uploadDocument}/></label>{uploading && <p role="status">Uploading document… Please wait before publishing.</p>}{attachment && <div className="actions"><p role="status">Ready to attach: {attachment.originalName}</p><button type="button" className="secondary-button" disabled={busy || uploading} onClick={() => {setAttachment(null);documentInput.current.value='';}}>Remove document</button></div>}</section>}<label className="field">Category<select name="category" defaultValue={task.category || 'coding'}>{taskCategories.map(value => <option key={value}>{value}</option>)}</select></label><Field label="Fixed project budget (₹)" name="budget" type="number" min="1" step="1" defaultValue={task.budget} required/><Field label="Deadline" name="deadline" type="date" min={new Date(Date.now() + 86400000).toLocaleDateString('en-CA')} defaultValue={task.deadline?.slice(0,10)} required/><Field label="Skills (comma separated)" name="skills" defaultValue={task.skills?.join(', ')}/><input type="hidden" name="contactMethod" value="email"/><input type="hidden" name="budgetType" value="fixed"/><div className="full-width"><FormStatus error={error}/><button className="button" disabled={busy || uploading}>{busy ? 'Saving…' : edit ? 'Save changes' : 'Publish task'}</button></div></form> : <p role="alert">You can only edit your own tasks.</p>}</ResourceState></section>;
 }
 
 export function TaskDetail() {

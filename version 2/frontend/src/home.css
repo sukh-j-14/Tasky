@@ -30,3 +30,4 @@ h1,h2,h3{font-family:Manrope,Arial,sans-serif;font-weight:500;letter-spacing:-.0
 .orbit-stage[data-open=true]>.scene-copy,.orbit-stage[data-open=true]>.planet-symbol{visibility:hidden}
 
 @media(max-width:760px){.orbit-stage[data-open=true]>.orbit-canvas{top:0}}
+.task-document-upload{border:1px dashed var(--border);border-radius:12px;padding:24px}.task-document-upload .workspace-heading{margin:0 0 12px;font-size:24px}.task-document-upload .workspace-heading small{font-size:14px;letter-spacing:0;color:var(--muted)}.task-document-upload>p{font-size:13px;line-height:1.7}.task-document-upload input[type=file]{max-width:100%;font-size:13px}.task-document-upload .actions{align-items:center;flex-wrap:wrap;overflow-wrap:anywhere}
